@@ -3,650 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>어사문 한자 학습</title>
+    <title>어사문 - 홈</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
     <style>
-        :root { --topbar-height: 60px; } /* 상단바 높이 조정 */
-        html { scroll-behavior: smooth; overflow-x: hidden; }
+        html { scroll-behavior: smooth; }
         body {
-            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI",Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            background-color: #FFFDE7; color: #333333;
-            padding-top: calc(var(--topbar-height) + 20px); /* 헤더 공간 확보 */
+            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #FFFDE7;
+            color: #333333;
         }
-        ::-webkit-scrollbar { width: 12px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: rgba(255, 140, 0, 0.6); border-radius: 10px; border: 3px solid #FFFDE7; }
-        ::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 140, 0, 0.8); }
-        
-        body.using-keyboard .interactive-box:focus,
-        body.using-keyboard button:focus,
-        body.using-keyboard a:focus,
-        .interactive-box:focus-visible, button:focus-visible, a:focus-visible {
-            outline: none; box-shadow: 0 0 0 3px #FF8C00, 0 0 15px rgba(255, 140, 0, 0.5);
+        main { padding-top: 4rem; padding-bottom: 4rem; }
+        .circle-button {
+            display: flex;
+            flex-direction: column;
+            height: 135px;
+            width: 135px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
         }
-
-        .kpi-card {
-            background-color: white; border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            border: 2px solid transparent;
+        .circle-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        
-        body:not(.using-keyboard) .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-
-        body:not(.using-keyboard) .kpi-card:hover,
-        .kpi-card.last-clicked {
-            border-color: #FF8C00;
-        }
-        
-        /* 키보드 모드일 때 특정 요소들의 호버 효과 비활성화 (포커스 상태가 아닐 때만) */
-        body.using-keyboard .kpi-card:hover:not(:focus) {
-            transform: none;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            border-color: transparent;
-        }
-
-        /* 일반적인 버튼과 링크의 호버 배경색 제거 (포커스 상태가 아닐 때만) */
-        body.using-keyboard a:hover:not(:focus),
-        body.using-keyboard button:hover:not(:focus) {
-            background-color: transparent;
-        }
-
-        body.using-keyboard #audio-controls button:hover {
-             background-color: rgba(251, 146, 60, 0.1);
-             transform: scale(1.1);
-        }
-        
-        .content-section { scroll-margin-top: calc(var(--topbar-height) + 1rem); }
-        .vocab-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
-        .vocab-details.open { max-height: 20rem; }
         #toast-notification {
-            transform: translate(-50%, 10px); opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            transform: translateX(-50%);
         }
-        #toast-notification.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
-        
-        /* 중앙 팝업 모달 스타일 */
-        .modal-popup {
-            position: fixed; inset: 0; z-index: 50;
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem;
-            background-color: transparent; /* 배경 투명 */
-            pointer-events: none; /* 닫혔을 때 뒷배경 클릭 허용 */
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s;
-        }
-        .modal-popup.open { 
-            opacity: 1; visibility: visible; 
-            pointer-events: auto; /* 열렸을 때 자신과 자식 요소만 클릭 가능 */
-        }
-        .modal-popup-content {
-            background-color: #FFFBEB; /* 연한 주황색 배경 */
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            padding: 1.5rem;
-            transform: scale(0.95); opacity: 0;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-        .modal-popup.open .modal-popup-content { transform: scale(1); opacity: 1; }
-        .actions-popup-content button { border: 1px solid #e2e8f0; }
-        
-        /* 음절 분석 팝업 스타일 */
-        .syllable-display { gap: 1rem; }
-        .syllable-char-box {
-            position: relative; padding: 1rem; border-radius: 0.5rem;
-            transition: all 0.2s ease-in-out; border: 1px solid #d1d5db;
-            text-align: center;
-            background-color: white;
-        }
-        .syllable-char-box:hover { background-color: #FEF3C7; border-color: #FDBA74; }
-        .syllable-char-box .hangul { font-size: 2.25rem; font-weight: bold; }
-        .syllable-char-box .hanja {
-            font-size: 0.8rem; color: #FF8C00;
-            position: absolute; right: 0.5rem; bottom: 0.5rem;
-        }
-
-        /* 오디오 플로팅 버튼 */
-        #audio-controls { transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-        #audio-controls.hidden { opacity: 0; visibility: hidden; transform: translateY(10px); }
-        #audio-controls button {
-            background-color: transparent;
-            color: #F97316; /* Orange-500 */
-            transition: all 0.2s ease;
-            border-radius: 9999px;
-            width: 28px; height: 28px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        #audio-controls button:hover {
-            background-color: rgba(251, 146, 60, 0.1); /* Orange-400 with alpha */
-            transform: scale(1.1);
-        }
-        #audio-controls button.active {
-            box-shadow: 0 0 0 3px #F97316;
-            background-color: rgba(251, 146, 60, 0.2);
+        #toast-notification.show {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
-<body class="antialiased">
-
-    <!-- SVG 아이콘 정의 -->
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></symbol>
-        <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
-        <symbol id="icon-youtube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10C2.5 6 7.5 4 12 4s9.5 2 9.5 3a24.12 24.12 0 0 1 0 10c0 1-5 3-9.5 3s-9.5-2-9.5-3Z"></path><path d="m10 8 6 4-6 4Z"></path></symbol>
-        <symbol id="icon-speaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></symbol>
-        <symbol id="icon-copy-notes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></symbol>
-        <symbol id="icon-naver-dict" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
-        <symbol id="icon-google-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></symbol>
-        <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></symbol>
-        <symbol id="icon-more-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></symbol>
-        <symbol id="icon-syllable-analysis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="2"></circle><circle cx="12" cy="16" r="2"></circle></symbol>
-        <symbol id="icon-ai-text" viewBox="0 0 24 24"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="15" font-weight="bold" fill="currentColor">AI</text></symbol>
-        <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
-        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
-        <symbol id="icon-play" viewBox="0 0 24 24" fill="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></symbol>
-        <symbol id="icon-pause" viewBox="0 0 24 24" fill="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></symbol>
-        <symbol id="icon-stop" viewBox="0 0 24 24" fill="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></symbol>
+<body class="antialiased flex flex-col min-h-screen">
+    <!-- SVG Icon Definitions -->
+    <svg class="hidden">
+      <defs>
+        <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20v2H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+          <path d="M4 5h16v12H4V5z"/>
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+        </symbol>
+      </defs>
     </svg>
 
-    <audio id="hanja-audio" preload="auto"></audio>
+    <header class="text-center pt-16 pb-8">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-[#FF8C00] drop-shadow-sm">어사문</h1>
+        <p class="mt-2 text-lg md:text-xl text-gray-600">어휘가 사고력과 문해력을 키운다</p>
+    </header>
 
-    <div class="relative min-h-screen">
-        <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm transition-transform duration-300" style="height: var(--topbar-height);">
-            <div class="flex justify-center items-center h-full px-4 max-w-5xl mx-auto">
-                <div class="flex items-center space-x-6">
-                    <a href="index.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="홈"><svg class="w-7 h-7 text-amber-900"><use href="#icon-home"></use></svg></a>
-                    <a href="search.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="검색하기"><svg class="w-7 h-7 text-amber-900"><use href="#icon-search"></use></svg></a>
-                    <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" title="왕관유자봇" class="p-2 rounded-full hover:bg-black/10 transition-colors"><svg class="w-7 h-7 text-amber-900"><use href="#icon-ai-text"></use></svg></a>
-                    <a id="youtube-search-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="YouTube에서 검색">
-                        <svg class="w-7 h-7 text-amber-900"><use href="#icon-youtube"></use></svg>
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <main class="flex-1 p-4 sm:p-6 lg:p-10">
-            <section id="overview" class="content-section mb-24 md:mb-32">
-                <div class="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto md:items-stretch">
-                    <div class="md:col-span-1">
-                        <div class="flex h-full gap-x-2">
-                            <div class="flex flex-col w-[60px] gap-y-2">
-                                <button id="audio-play-btn" class="flex-1 p-3 rounded-lg bg-white shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center" title="음성 듣기 (A)">
-                                    <svg class="w-6 h-6 text-gray-700"><use href="#icon-speaker"></use></svg>
-                                </button>
-                                <button id="copy-notes-btn" class="flex-1 p-3 rounded-lg bg-white shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center" title="판서 내용 복사">
-                                    <svg class="w-6 h-6 text-gray-700"><use href="#icon-copy-notes"></use></svg>
-                                </button>
-                            </div>
-                            <div id="overview-hanja-box" class="interactive-box kpi-card flex-1 flex flex-col items-center justify-center p-8 h-full" tabindex="0">
-                                <div class="text-center">
-                                    <h1 id="main-hanja" class="text-8xl md:text-9xl font-semibold text-orange-600"></h1>
-                                    <p id="overview-huneum" class="text-4xl md:text-5xl text-orange-600 mt-4"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="overview-info-box" class="md:col-span-2 kpi-card interactive-box p-8 flex flex-col justify-center" tabindex="0">
-                        <div>
-                            <h2 class="text-3xl font-bold mb-6 text-[#FF8C00]">한자 정보</h2>
-                            <p class="text-xl text-gray-700 mb-3"><strong>목차:</strong> <span id="overview-index"></span></p>
-                            <p class="text-xl text-gray-700 mb-3"><strong>전체 연번:</strong> <span id="overview-serial"></span></p>
-                            <p class="text-xl text-gray-700"><strong>교과서 단어:</strong> <span id="overview-textbook"></span></p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <section id="meaning" class="content-section mb-24 md:mb-32">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-4xl font-bold mb-8 text-left">✨ 해설</h2>
-                    <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="meaning-explanation-box" class="interactive-box kpi-card p-8 mb-8 bg-amber-50" tabindex="0">
-                            <h3 id="explanation-title" class="text-3xl font-bold mb-4 text-[#FF8C00]"></h3>
-                            <p id="explanation-text" class="text-lg leading-relaxed"></p>
-                        </div>
-                        <div id="meanings-list" class="grid grid-cols-1 gap-6"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="vocabulary" class="content-section mb-24 md:mb-32">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-4xl font-bold mb-8 text-left">📚 어휘</h2>
-                    <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="advanced-vocab" class="content-section mb-16">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-4xl font-bold mb-8 text-left">🚀 도약</h2>
-                    <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="advanced-vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-        
-        <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
-            <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
-                <div class="text-center text-gray-800 font-semibold">
-                       <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
-                       <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
-                </div>
-                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
-                        <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
-                        <span class="font-semibold text-gray-700">교재 구입하기</span>
-                    </a>
-                    <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
-                        <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
-                        <span class="font-semibold text-gray-700">앱 다운로드</span>
-                    </a>
-                </div>
-            </div>
-        </footer>
-        <div class="text-center text-sm text-gray-500 pb-4">
-            <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
+    <main class="container mx-auto px-4 flex flex-col items-center flex-grow">
+        <!-- Buttons Container -->
+        <div class="flex flex-wrap justify-center gap-4 md:gap-8">
+            <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
+                <span class="text-5xl">🔢</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
+            </a>
+            <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
+                <span class="text-5xl">🀄</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">한자</span>
+            </a>
+            <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
+                <span class="text-5xl">📖</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">어휘</span>
+            </a>
+            <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
+                <span class="text-5xl">🔍</span>
+                <span class="mt-1 text-lg font-semibold">검색</span>
+            </a>
+            <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
+                <span class="text-5xl leading-none">🤖</span>
+                <span class="mt-1 text-lg font-semibold">AI챗봇</span>
+            </a>
         </div>
+    </main>
+
+    <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
+        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
+            <div class="text-center text-gray-800 font-semibold">
+                <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
+                <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+            </div>
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
+                    <span class="font-semibold text-gray-700">교재 구입하기</span>
+                </a>
+                <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
+                    <span class="font-semibold text-gray-700">앱 다운로드</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    <div class="text-center text-sm text-gray-500 pb-4">
+        <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
     </div>
-    
+
     <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
 
-    <!-- Syllable/Actions Modals -->
-    <div id="syllable-modal" class="modal-popup">
-        <div class="modal-popup-content">
-            <div class="syllable-display flex flex-wrap justify-center items-center text-center"></div>
-        </div>
-    </div>
-    <div id="actions-modal" class="modal-popup">
-        <div class="modal-popup-content">
-            <div class="actions-popup-content flex justify-around items-center gap-x-4"></div>
-        </div>
-    </div>
-
-
-    <!-- 오디오 컨트롤러 -->
-    <div id="audio-controls" class="hidden fixed bottom-5 right-5 z-40 flex">
-        <button id="audio-play-pause-btn"><svg class="w-4 h-4"><use href="#icon-play"></use></svg></button>
-    </div>
-
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const params = new URLSearchParams(window.location.search);
-            const hanjaId = params.get('id');
-            if (!hanjaId) throw new Error("한자 ID가 URL에 없습니다.");
-
-            const response = await fetch('./data/hanja_db.json');
-            if (!response.ok) throw new Error('데이터베이스 파일을 불러올 수 없습니다.');
-            const allHanjaData = await response.json();
-
-            const currentHanjaData = allHanjaData.find(item => item.id === hanjaId);
-
-            if (currentHanjaData) {
-                renderPage(currentHanjaData);
-                addAllEventListeners(currentHanjaData, allHanjaData);
-            } else {
-                throw new Error("해당 ID의 한자 정보를 찾을 수 없습니다.");
-            }
-        } catch (error) {
-            console.error("페이지 로딩 오류:", error);
-            document.querySelector('main').innerHTML = `<div class="text-center p-10 text-red-600"><h1>페이지를 불러올 수 없습니다</h1><p>${error.message}</p></div>`;
-        }
-    });
-
-    function renderPage(data) {
-        document.title = `[${data.id.replace('-', '권_')}] ${data.serial}_${data.huneum}`;
-        
-        document.getElementById('youtube-search-link').href = `https://www.youtube.com/@CrownYuja/search?query=${encodeURIComponent(data.huneum)}`;
-        document.getElementById('main-hanja').textContent = data.hanja;
-        document.getElementById('overview-huneum').textContent = data.huneum;
-        document.getElementById('overview-index').textContent = `어사문 [${data.id.replace('-', '권_')}]`;
-        document.getElementById('overview-serial').textContent = data.serial;
-        document.getElementById('overview-textbook').textContent = data.textbook || '없음';
-        document.getElementById('explanation-title').innerHTML = `${data.huneum} (<strong class="font-bold">${data.hanja}</strong>)`;
-        document.getElementById('explanation-text').textContent = data.explanation;
-        
-        const advancedVocabSection = document.getElementById('advanced-vocab');
-        if (!data.advancedVocabulary || data.advancedVocabulary.length === 0) {
-            if (advancedVocabSection) advancedVocabSection.style.display = 'none';
-        }
-
-        const renderItems = (container, dataList, cardCreator) => {
-            if (container && dataList?.length > 0) container.innerHTML = dataList.map((item, index) => cardCreator(item, index)).join('');
-        };
-
-        const meaningsList = document.getElementById('meanings-list');
-        if (meaningsList && data.meanings) {
-            const meaningsCount = data.meanings.length;
-            meaningsList.classList.remove('md:grid-cols-2', 'md:grid-cols-3');
-            if (meaningsCount === 2) meaningsList.classList.add('md:grid-cols-2');
-            else if (meaningsCount >= 3) meaningsList.classList.add('md:grid-cols-3');
-        }
-
-        const createMeaningCardHTML = (m) => `<div class="interactive-box kpi-card p-6" tabindex="0"><h3 class="text-xl font-bold mb-2 text-[#4CAF50]">${m.title}</h3><p class="text-gray-700">${m.definition.replace(/│/g, '')}</p><p class="text-sm italic text-gray-500 mt-2">예: ${m.example}</p></div>`;
-        
-        const createVocabularyCardHTML = (v, index, isAdvanced = false) => {
-            const vocabTitle = isAdvanced ? v.word : v.title;
-            const titleHTML = isAdvanced ? `<h3 class="text-2xl font-bold">${v.word}</h3>` : `<h3 class="text-2xl font-bold">${v.title.replace(/(\([^)]+\))/g, '<strong class="font-bold text-orange-600">$1</strong>')}</h3>`;
-            
-            const actionsHTML = `<div class="flex items-center">
-                <button class="syllable-analysis-btn p-2 rounded-full hover:bg-gray-100" title="음절 분석"><svg class="w-6 h-6 text-gray-500"><use href="#icon-syllable-analysis"></use></svg></button>
-                <button class="vocab-actions-toggle flex-shrink-0 p-2 -mr-2 rounded-full hover:bg-gray-100"><svg class="w-6 h-6 text-gray-500"><use href="#icon-more-vertical"></use></svg></button>
-            </div>`;
-
-            const linkHTML = isAdvanced ? `<a href="hanja-detail.html?id=${v.linkId}" class="vocab-link inline-flex items-center font-bold text-xs py-0.5 px-2 rounded-full transition-colors" data-volume="${v.linkId.split('-')[0]}">${v.linkId.replace('-', '권_')} <svg class="w-5 h-5 ml-1"><use href="#icon-arrow-right"></use></svg></a>` : '';
-
-            let detailsHTML;
-            if (isAdvanced) {
-                detailsHTML = `<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                    ${linkHTML}
-                    ${actionsHTML}
-                </div>`;
-            } else {
-                detailsHTML = `<div class="vocab-details mt-4 space-y-2 pt-4 border-t border-gray-200" id="vocab-details-${index}"><p><strong>뜻:</strong> ${v.definition}</p><p><strong>구성:</strong> ${v.composition}</p>${v.analysis ? `<p><strong>풀이:</strong> ${v.analysis}</p>` : ''}<p class="italic"><strong>예:</strong> ${v.example}</p></div>`;
-            }
-
-            const cardDataAttributes = `data-title="${vocabTitle}"`;
-
-            return `<div class="kpi-card interactive-box relative p-6" role="button" tabindex="0" aria-expanded="false" aria-controls="vocab-details-${index}" ${cardDataAttributes}>
-                <div class="flex justify-between items-start">
-                    ${titleHTML}
-                    ${!isAdvanced ? actionsHTML : ''}
-                </div>
-                ${detailsHTML}
-            </div>`;
-        };
-
-        renderItems(meaningsList, data.meanings, createMeaningCardHTML);
-        renderItems(document.getElementById('vocabulary-list'), data.vocabulary, (v, i) => createVocabularyCardHTML(v, i, false));
-        renderItems(document.getElementById('advanced-vocabulary-list'), data.advancedVocabulary, (v, i) => createVocabularyCardHTML(v, i, true));
-    }
-    
-    let isKeyboardMode = false;
-    let firstKeydown = true;
-
-    function addAllEventListeners(hanjaData, allHanjaData) {
-        // 마우스가 움직이면 'using-keyboard' 클래스를 제거합니다.
-        document.addEventListener('mousemove', () => {
-            if (isKeyboardMode) {
-                isKeyboardMode = false;
-                document.body.classList.remove('using-keyboard');
-            }
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .then(() => console.log('Service Worker Registered'));
         });
-        
-        document.querySelectorAll('.interactive-box, .footer-link, #audio-play-btn, #copy-notes-btn').forEach(el => {
-            el.addEventListener('focus', () => {
-                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-            });
-        });
+      }
 
-        document.querySelectorAll('.kpi-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                // Ignore clicks on inner buttons or links
-                if (e.target.closest('button, a')) return;
-
-                // Remove highlight from the previously clicked card
-                document.querySelector('.kpi-card.last-clicked')?.classList.remove('last-clicked');
-                
-                // Highlight the currently clicked card
-                card.classList.add('last-clicked');
-            });
-        });
-
-        const audioEl = document.getElementById('hanja-audio');
-        audioEl.src = `./audio/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum}.wav`;
-        audioEl.addEventListener('ended', handleAudioStop);
-        audioEl.addEventListener('play', () => updateAudioControlsUI(true));
-        audioEl.addEventListener('pause', () => updateAudioControlsUI(false));
-
-        document.getElementById('audio-play-btn')?.addEventListener('click', toggleAudioPlayStop);
-        document.getElementById('copy-notes-btn')?.addEventListener('click', () => copyNotes(hanjaData));
-        
-        document.getElementById('buy-book-link')?.addEventListener('click', (e) => { e.preventDefault(); showToast('현재 준비되지 않음'); });
-        document.getElementById('download-app-link')?.addEventListener('click', (e) => { e.preventDefault(); showToast('현재 준비되지 않음'); });
-
-        document.getElementById('audio-play-pause-btn').addEventListener('click', toggleAudioPause);
-        
-        document.querySelectorAll('.kpi-card[role="button"]').forEach(card => card.addEventListener('click', function(e) {
-            // 키보드 모드일 때 실제 마우스 클릭(e.detail > 0)을 방지합니다.
-            // 프로그래밍 방식의 click() 호출(e.detail === 0)은 허용합니다.
-            if (isKeyboardMode && e.detail !== 0) {
-                return;
-            }
-            if (e.target.closest('button, a')) return;
-            const details = card.querySelector('.vocab-details');
-            if (details) {
-                const wasOpen = details.classList.contains('open');
-                details.classList.toggle('open');
-                card.setAttribute('aria-expanded', !wasOpen);
-                if (!wasOpen) {
-                    setTimeout(() => {
-                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 500); // Transition is 0.5s
-                }
-            }
-        }));
-        
-        document.querySelectorAll('.syllable-analysis-btn').forEach(btn => btn.addEventListener('click', (e) => handleSyllableAnalysis(e, allHanjaData)));
-        document.querySelectorAll('.vocab-actions-toggle').forEach(btn => btn.addEventListener('click', (e) => handleActionsPopup(e)));
-
-        const getBadgeColorClasses = (v) => ['','bg-red-200 text-red-800 hover:bg-red-300','bg-blue-200 text-blue-800 hover:bg-blue-300','bg-green-200 text-green-800 hover:bg-green-300','bg-yellow-200 text-yellow-800 hover:bg-yellow-300','bg-indigo-200 text-indigo-800 hover:bg-indigo-300','bg-purple-200 text-purple-800 hover:bg-purple-300','bg-pink-200 text-pink-800 hover:bg-pink-300','bg-teal-200 text-teal-800 hover:bg-teal-300','bg-slate-300 text-slate-800 hover:bg-slate-400','bg-orange-300 text-orange-800 hover:bg-orange-400'][parseInt(v, 10)] || '';
-        document.querySelectorAll('.vocab-link').forEach(link => link.className += ' ' + getBadgeColorClasses(link.dataset.volume));
-
-        document.addEventListener('keydown', handleShortcuts);
-        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
-        
-        document.querySelectorAll('.modal-popup').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeAllPopups();
-            });
-        });
-    }
-
-    function closeAllPopups() {
-        document.querySelectorAll('.modal-popup.open').forEach(p => p.classList.remove('open'));
-    }
-    
-    // --- Popups (Modals) ---
-    const syllableModal = document.getElementById('syllable-modal');
-    function handleSyllableAnalysis(e, allHanjaData) {
-        e.stopPropagation();
-        closeAllPopups();
-        const card = e.currentTarget.closest('.kpi-card');
-        const title = card.dataset.title;
-        const match = title.match(/([^\(]+)\(([^\)]+)\)/);
-        if (!match) return;
-
-        const [_, hangul, hanjaStr] = match;
-        const syllableDisplay = syllableModal.querySelector('.syllable-display');
-        syllableDisplay.innerHTML = hangul.split('').map((hangulChar, i) => {
-            const hanjaChar = hanjaStr[i];
-            const linkedHanja = allHanjaData.find(item => item.hanja === hanjaChar);
-            const content = `<div class="hangul">${hangulChar}</div><div class="hanja">${hanjaChar}</div>`;
-            return linkedHanja
-                ? `<a href="hanja-detail.html?id=${linkedHanja.id}" class="syllable-char-box block">${content}</a>`
-                : `<a href="https://hanja.naver.com/search?query=${encodeURIComponent(hanjaChar)}" target="_blank" rel="noopener noreferrer" class="syllable-char-box block">${content}</a>`;
-        }).join('');
-        
-        syllableModal.classList.add('open');
-    }
-    
-    const actionsModal = document.getElementById('actions-modal');
-    function handleActionsPopup(e) {
-        e.stopPropagation();
-        closeAllPopups();
-        const card = e.currentTarget.closest('.kpi-card');
-        const title = card.dataset.title;
-        if (!title) return;
-
-        const actionsContent = actionsModal.querySelector('.actions-popup-content');
-        actionsContent.innerHTML = `
-            <button class="ai-link p-3 rounded-full text-purple-500 hover:bg-gray-100 transition-colors" data-title="${title}" aria-label="AI 챗봇으로 질문"><svg class="w-8 h-8"><use href="#icon-ai-text"></use></svg></button>
-            <button class="naver-dictionary-link p-3 rounded-full hover:bg-gray-100 transition-colors" data-title="${title}" aria-label="네이버 사전에서 검색"><svg class="w-7 h-7 text-green-500"><use href="#icon-naver-dict"></use></svg></button>
-            <button class="google-image-link p-3 rounded-full hover:bg-gray-100 transition-colors" data-title="${title}" aria-label="Google 이미지에서 검색"><svg class="w-7 h-7 text-orange-500"><use href="#icon-google-img"></use></svg></button>`;
-        
-        actionsContent.querySelector('.ai-link').addEventListener('click', handleAiLink);
-        actionsContent.querySelector('.naver-dictionary-link').addEventListener('click', (ev) => handleSearchLink(ev, 'https://hanja.naver.com/search?query='));
-        actionsContent.querySelector('.google-image-link').addEventListener('click', (ev) => handleSearchLink(ev, 'https://www.google.com/search?tbm=isch&q='));
-
-        actionsModal.classList.add('open');
-    }
-
-    // --- Audio Controls ---
-    const audioEl = document.getElementById('hanja-audio');
-    const audioControls = document.getElementById('audio-controls');
-    const playPauseBtn = document.getElementById('audio-play-pause-btn');
-
-    function toggleAudioPlayStop() {
-        if (audioEl.dataset.playing === "true") handleAudioStop(); 
-        else { audioEl.play().catch(err => showToast('오디오를 재생할 수 없습니다.', 'error')); audioEl.dataset.playing = "true"; audioControls.classList.remove('hidden'); }
-    }
-    function handleAudioStop() { audioEl.pause(); audioEl.currentTime = 0; audioEl.dataset.playing = "false"; audioControls.classList.add('hidden'); }
-    function toggleAudioPause() { if (!audioEl.paused) audioEl.pause(); else audioEl.play().catch(err => showToast('오디오 재생 실패', 'error')); }
-    function updateAudioControlsUI(isPlaying) {
-        const use = playPauseBtn.querySelector('use');
-        use.setAttribute('href', isPlaying ? '#icon-pause' : '#icon-play');
-        playPauseBtn.classList.toggle('active', isPlaying);
-    }
-
-    // --- Other Handlers ---
-    let lastScrollY = window.scrollY;
-    function handleHeaderScroll() {
-        const topbar = document.getElementById('topbar');
-        const currentScrollY = window.scrollY;
-        if (topbar) {
-            if (currentScrollY <= 10) topbar.style.transform = 'translateY(0%)';
-            else if (lastScrollY < currentScrollY) topbar.style.transform = 'translateY(-100%)';
-            else topbar.style.transform = 'translateY(0%)';
-        }
-        lastScrollY = currentScrollY;
-    }
-
-    async function copyNotes(hanjaData) {
-        const notesFile = `./notes/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum} (판서).txt`;
-        try {
-            const response = await fetch(notesFile);
-            if (!response.ok) throw new Error('판서 파일을 찾을 수 없습니다.');
-            const text = await response.text();
-            await navigator.clipboard.writeText(text);
-            showToast('판서 내용이 복사되었습니다.');
-        } catch (err) { console.error('판서 복사 실패:', err); showToast('판서 파일을 불러오는 데 실패했습니다.', 'error'); }
-    }
-
-    function getVocabTitle(clickedElement) {
-        return clickedElement.dataset.title || clickedElement.closest('.kpi-card')?.dataset.title;
-    }
-
-    function handleSearchLink(e, baseUrl) {
-        e.stopPropagation();
-        const title = getVocabTitle(e.currentTarget);
-        if (title) {
-            const query = e.currentTarget.classList.contains('google-image-link') ? title.replace(/\(.*\)/, '').trim() : title;
-            window.open(`${baseUrl}${encodeURIComponent(query)}`, '_blank');
-        }
-    }
-
-    async function handleAiLink(e) {
-        e.stopPropagation();
-        const title = getVocabTitle(e.currentTarget);
-        if (title) {
-            try {
-                if (navigator.clipboard?.writeText) { 
-                    await navigator.clipboard.writeText(title); 
-                    showToast('어휘가 클립보드에 복사되었습니다.'); 
-                }
-                window.open('https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos', '_blank');
-            } catch (err) { 
-                showToast('클립보드 복사에 실패했습니다.', 'error'); 
-            }
-        }
-    }
-
-    function handleShortcuts(e) {
-        // 페이지 로드 후 첫 키보드 입력에 대한 특별 처리
-        if (firstKeydown) {
-            // 키보드 모드 활성화
-            if (!isKeyboardMode) {
-                isKeyboardMode = true;
-                document.body.classList.add('using-keyboard');
-            }
-            
-            // 아직 아무 요소에도 포커스가 없다면 오디오 버튼에 포커스를 줍니다.
-            if (document.activeElement === document.body || document.activeElement === null) {
-                document.getElementById('audio-play-btn')?.focus();
-            }
-            
-            // 첫 키 입력 처리가 끝났음을 표시하고, 이 키 입력이 다른 동작(예: 화살표 키 내비게이션)을 유발하지 않도록 여기서 함수를 종료합니다.
-            firstKeydown = false;
-            e.preventDefault(); // 화살표 키 등의 기본 동작(스크롤 등) 방지
-            return;
-        }
-
-        const anyPopupOpen = !!document.querySelector('.modal-popup.open');
-        if (anyPopupOpen) {
-            if (e.key === 'Escape') closeAllPopups();
-            return;
-        }
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-        const activeEl = document.activeElement;
-        if (activeEl) {
-            if (activeEl.id === 'audio-play-btn' && e.key === 'ArrowRight') {
-                e.preventDefault();
-                document.getElementById('copy-notes-btn')?.focus();
-                return;
-            }
-            if (activeEl.id === 'copy-notes-btn' && e.key === 'ArrowLeft') {
-                e.preventDefault();
-                document.getElementById('audio-play-btn')?.focus();
-                return;
-            }
-        }
-
-        const key = e.key.toLowerCase();
-        if (key === 'a') { e.preventDefault(); toggleAudioPlayStop(); } 
-        else if (key === 's') { if (audioEl.dataset.playing === "true") { e.preventDefault(); toggleAudioPause(); } } 
-        else if (key === 'e') { e.preventDefault(); const target = document.getElementById('purchase-box'); target?.focus(); } 
-        else if (e.key.startsWith('Arrow')) { e.preventDefault(); navigateWithArrows(e.key); }
-        else if (e.key === ' ' || e.key === 'Enter') { 
-            const activeEl = document.activeElement;
-            if (activeEl && typeof activeEl.click === 'function') {
-                e.preventDefault();
-                activeEl.click();
-            }
-        }
-    }
-    
-    function navigateWithArrows(key) {
-        const focusableElements = Array.from(document.querySelectorAll('#audio-play-btn, #copy-notes-btn, .interactive-box, .footer-link'));
-        if (focusableElements.length === 0) return;
-        let currentIndex = focusableElements.indexOf(document.activeElement);
-        if (currentIndex === -1) { 
-            focusableElements[0]?.focus(); 
-            return; 
-        }
-        let nextIndex = currentIndex;
-        if (key === 'ArrowRight' || key === 'ArrowDown') { nextIndex = (currentIndex + 1) % focusableElements.length; } 
-        else if (key === 'ArrowLeft' || key === 'ArrowUp') { nextIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length; }
-        focusableElements[nextIndex]?.focus();
-    }
-
-    let toastTimeout;
-    function showToast(message, type = 'success') {
+      // Simple toast notification function
+      const showToast = (message) => {
         const toast = document.getElementById('toast-notification');
-        if (!toast) return;
         toast.textContent = message;
-        toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50 ${type === 'error' ? 'bg-red-600' : 'bg-gray-800'} show`;
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // Example links - replace with actual URLs
+      document.getElementById('buy-book-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('교재 구입 페이지로 이동합니다.');
+        // window.location.href = 'YOUR_PURCHASE_LINK';
+      });
+
+      document.getElementById('download-app-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('앱 다운로드 페이지로 이동합니다.');
+        // window.location.href = 'YOUR_APP_DOWNLOAD_LINK';
+      });
     </script>
 </body>
 </html>
