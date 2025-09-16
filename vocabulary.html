@@ -6,7 +6,6 @@
     <title>목차 - 어휘 순서</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FFD700">
     <style>
         /* Base and Font Styles */
@@ -156,7 +155,6 @@
 </head>
 <body class="antialiased">
     
-    <!-- 1st Row: New Main Navigation Header -->
     <header class="header-fixed h-14 flex items-center justify-center px-4">
         <nav class="flex items-center space-x-2 sm:space-x-4">
             <a href="index.html" class="nav-link p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
@@ -174,18 +172,15 @@
         </nav>
     </header>
     
-    <!-- 2nd & 3rd Row: Filter Headers in a Container -->
     <div id="filter-container" class="filter-container-fixed">
         <div id="primary-filter" class="flex items-center justify-center space-x-2 px-4 h-14 overflow-x-auto no-scrollbar filter-nav">
-            <!-- 1차 자음 필터 버튼이 여기에 생성됩니다 -->
-        </div>
+            </div>
         <div id="secondary-filter-wrapper" class="relative flex items-center">
              <button id="scroll-left" class="scroll-arrow absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1 bg-orange-200/70 rounded-full shadow-md hover:bg-orange-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
             </button>
             <div id="secondary-filter" class="flex items-center space-x-1 px-14 h-14 overflow-x-auto no-scrollbar filter-nav w-full scroll-px-14">
-                <!-- 2차 음절 필터 버튼이 여기에 생성됩니다 -->
-            </div>
+                </div>
              <button id="scroll-right" class="scroll-arrow absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 bg-orange-200/70 rounded-full shadow-md hover:bg-orange-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
             </button>
@@ -199,7 +194,6 @@
         <div id="list-container"></div>
     </main>
 
-    <!-- ▼▼▼▼▼ 플로팅 검색 버튼 및 팝업창 HTML ▼▼▼▼▼ -->
     <button id="search-fab" class="fixed bottom-6 right-6 bg-amber-500 text-white p-4 rounded-full shadow-lg hover:bg-amber-600 transition-colors z-30">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
     </button>
@@ -221,8 +215,6 @@
             </form>
         </div>
     </div>
-    <!-- ▲▲▲▲▲ 플로팅 검색 버튼 및 팝업창 HTML ▲▲▲▲▲ -->
-    
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingEl = document.getElementById('loading');
@@ -353,8 +345,8 @@
             
             function renderConsonantGroup(consonant, data) {
                  if (!data[consonant]) {
-                     listContainer.innerHTML = `<p class="text-center py-10 text-gray-500">데이터가 없습니다.</p>`;
-                     return;
+                      listContainer.innerHTML = `<p class="text-center py-10 text-gray-500">데이터가 없습니다.</p>`;
+                      return;
                  }
                 const sortedSyllables = Object.keys(data[consonant]).sort((a,b) => a.localeCompare(b, 'ko-KR'));
                 const subGroupsHtml = sortedSyllables.map(syllable => {

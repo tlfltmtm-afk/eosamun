@@ -6,7 +6,6 @@
     <title>어사문 - 홈</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FFD700">
     <style>
         html { scroll-behavior: smooth; }
@@ -54,7 +53,6 @@
     </style>
 </head>
 <body class="antialiased flex flex-col min-h-screen">
-    <!-- SVG Icon Definitions -->
     <svg class="hidden">
       <defs>
         <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -75,7 +73,6 @@
     </header>
 
     <main class="container mx-auto px-4 flex flex-col items-center flex-grow">
-        <!-- Buttons Container -->
         <div class="flex flex-wrap justify-center gap-4 md:gap-8">
             <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
                 <span class="text-5xl">🔢</span>
@@ -125,13 +122,6 @@
     <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
 
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-              .then(() => console.log('Service Worker Registered'));
-        });
-      }
-
       // Simple toast notification function
       const showToast = (message) => {
         const toast = document.getElementById('toast-notification');
@@ -146,7 +136,7 @@
       document.getElementById('buy-book-link').addEventListener('click', (e) => {
         e.preventDefault();
         showToast('교재 구입 페이지로 이동합니다.');
-        // window.location.href = 'YOUR_PURCHASE_LINK';
+        // window.location.href = 'YOUR_PURCHAS_LINK';
       });
 
       document.getElementById('download-app-link').addEventListener('click', (e) => {
@@ -157,4 +147,3 @@
     </script>
 </body>
 </html>
-

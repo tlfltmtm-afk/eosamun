@@ -6,7 +6,6 @@
     <title>검색</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FFD700">
     <style>
         body { 
@@ -116,7 +115,6 @@
     </header>
 
     <main class="p-4 max-w-2xl mx-auto">
-        <!-- 검색 입력 섹션 -->
         <section class="my-6">
             <div class="relative">
                 <input type="search" id="search-input" placeholder="검색어 입력" class="w-full pl-12 pr-4 py-3 text-lg bg-white border-2 border-amber-500 rounded-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-sm">
@@ -126,33 +124,26 @@
             </div>
         </section>
 
-        <!-- 검색 결과 및 안내 섹션 -->
         <section id="results-section">
             <div id="guidance-text" class="text-center text-gray-500 py-8">
                 궁금한 어휘(한자, 단어 등)를 검색해 보세요.
             </div>
             <div id="results-container" class="space-y-3">
-                <!-- Search results will be appended here -->
-            </div>
+                </div>
         </section>
 
-        <!-- 검색 결과가 없을 때 표시되는 섹션 -->
         <section id="no-results-section" class="hidden mt-8 text-center">
              <p id="no-results-message" class="text-gray-800 font-semibold text-lg mb-6"></p>
             <div class="space-y-4">
                 <a id="ai-chatbot-link" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    <!-- Text will be injected by JS -->
-                </a>
+                    </a>
                 <a id="korean-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    <!-- Text will be injected by JS -->
-                </a>
+                    </a>
                 <a id="hanja-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    <!-- Text will be injected by JS -->
-                </a>
+                    </a>
             </div>
         </section>
 
-        <!-- 하단 외부 링크 섹션 -->
         <section class="mt-12 pt-8 border-t-2 border-amber-200">
             <div class="max-w-xl mx-auto">
                 <div class="grid grid-cols-3 gap-4">
@@ -172,7 +163,6 @@
             </div>
         </section>
 
-        <!-- ▼▼▼▼▼ 추가된 하단 푸터 섹션 ▼▼▼▼▼ -->
         <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
             <div id="purchase-box" tabindex="0" class="interactive-box w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
                 <div class="text-center text-gray-800 font-semibold">
@@ -194,10 +184,8 @@
         <div class="text-center text-sm text-gray-500 pb-4">
             <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
         </div>
-        <!-- ▲▲▲▲▲ 추가된 하단 푸터 섹션 ▲▲▲▲▲ -->
-    </main>
+        </main>
     
-    <!-- ▼▼▼▼▼ SVG 아이콘 정의 ▼▼▼▼▼ -->
     <svg class="hidden">
       <defs>
         <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -210,8 +198,6 @@
         </symbol>
       </defs>
     </svg>
-    <!-- ▲▲▲▲▲ SVG 아이콘 정의 ▲▲▲▲▲ -->
-     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('search-input');
@@ -410,4 +396,3 @@
     </script>
 </body>
 </html>
-

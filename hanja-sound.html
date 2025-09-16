@@ -6,7 +6,6 @@
     <title>목차 - 한자음 순서</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FFD700">
     <style>
         /* old.html의 스타일을 기반으로 재구성 + 요청된 스타일 추가 */
@@ -185,51 +184,41 @@
 </head>
 <body class="antialiased">
 
-    <!-- New Fixed Header -->
     <header class="header-fixed h-14 flex items-center justify-center px-4">
         <nav class="flex items-center space-x-2 sm:space-x-4">
-            <!-- 홈 버튼 (SVG 아이콘) -->
             <a href="index.html" class="nav-link p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
                 <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             </a>
-            <!-- 연번 버튼 (텍스트) -->
             <a href="serial-order.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="연번" data-tooltip="어사문 교재 순서대로">
                 연번
             </a>
-            <!-- 한자 버튼 (텍스트) - Active State -->
             <a href="hanja-sound.html" class="nav-link active px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="한자음" data-tooltip="한자의 음 ㄱㄴㄷ 순서대로">
                 한자
             </a>
-            <!-- 어휘 버튼 (텍스트) -->
             <a href="vocabulary.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="어휘" data-tooltip="어휘의 ㄱㄴㄷ 순서대로">
                 어휘
             </a>
         </nav>
     </header>
 
-    <!-- 자음별 빠른 이동 네비게이션 (old.html 구조) -->
     <div id="secondary-nav" class="nav-wrapper">
         <div class="h-full px-4 sm:px-6 lg:px-8 w-full">
             <div id="secondary-nav-content" class="nav-content-container"></div>
         </div>
     </div>
 
-    <!-- 메인 콘텐츠 -->
     <main id="main-content" class="px-4 sm:px-6 lg:px-8">
         <section id="hanja-sound" class="mb-12">
             <div id="content-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-                <!-- 데이터 로딩 메시지 -->
                 <div id="loading" class="text-center p-10 font-semibold text-amber-600">목차를 불러오는 중입니다...</div>
             </div>
         </section>
     </main>
 
-    <!-- 푸터 -->
     <footer class="text-center p-8 mt-10 text-sm text-gray-500">
         <p>왕관유자샘의 어휘 향상 프로젝트</p>
     </footer>
 
-    <!-- ▼▼▼▼▼ 플로팅 검색 버튼 및 팝업창 HTML ▼▼▼▼▼ -->
     <button id="search-fab" class="fixed bottom-6 right-6 bg-amber-500 text-white p-4 rounded-full shadow-lg hover:bg-amber-600 transition-colors z-30">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
     </button>
@@ -251,9 +240,6 @@
             </form>
         </div>
     </div>
-    <!-- ▲▲▲▲▲ 플로팅 검색 버튼 및 팝업창 HTML ▲▲▲▲▲ -->
-
-
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         // --- DOM 요소 선택 ---
