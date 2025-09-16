@@ -133,7 +133,6 @@
 </head>
 <body class="antialiased">
 
-    <!-- SVG 아이콘 정의 -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></symbol>
         <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
@@ -156,7 +155,7 @@
     <audio id="hanja-audio" preload="auto"></audio>
 
     <div class="relative min-h-screen">
-        <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm transition-transform duration-300" style="height: var(--topbar-height);">
+        <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm" style="height: var(--topbar-height);">
             <div class="flex justify-center items-center h-full px-4 max-w-5xl mx-auto">
                 <div class="flex items-center space-x-6">
                     <a href="index.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="홈"><svg class="w-7 h-7 text-amber-900"><use href="#icon-home"></use></svg></a>
@@ -258,7 +257,6 @@
     
     <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
 
-    <!-- Syllable/Actions Modals -->
     <div id="syllable-modal" class="modal-popup">
         <div class="modal-popup-content">
             <div class="syllable-display flex flex-wrap justify-center items-center text-center"></div>
@@ -271,7 +269,6 @@
     </div>
 
 
-    <!-- 오디오 컨트롤러 -->
     <div id="audio-controls" class="hidden fixed bottom-5 right-5 z-40 flex">
         <button id="audio-play-pause-btn"><svg class="w-4 h-4"><use href="#icon-play"></use></svg></button>
     </div>
@@ -441,7 +438,6 @@
         document.querySelectorAll('.vocab-link').forEach(link => link.className += ' ' + getBadgeColorClasses(link.dataset.volume));
 
         document.addEventListener('keydown', handleShortcuts);
-        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
         
         document.querySelectorAll('.modal-popup').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -517,18 +513,6 @@
     }
 
     // --- Other Handlers ---
-    let lastScrollY = window.scrollY;
-    function handleHeaderScroll() {
-        const topbar = document.getElementById('topbar');
-        const currentScrollY = window.scrollY;
-        if (topbar) {
-            if (currentScrollY <= 10) topbar.style.transform = 'translateY(0%)';
-            else if (lastScrollY < currentScrollY) topbar.style.transform = 'translateY(-100%)';
-            else topbar.style.transform = 'translateY(0%)';
-        }
-        lastScrollY = currentScrollY;
-    }
-
     async function copyNotes(hanjaData) {
         const notesFile = `./notes/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum} (판서).txt`;
         try {
@@ -650,4 +634,3 @@
     </script>
 </body>
 </html>
-
