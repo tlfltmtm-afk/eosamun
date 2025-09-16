@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>어사문 한자 학습</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <style>
+        :root { --topbar-height: 0px; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI",Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #f0f0f0; color: #333333; transition: background-color 0.3s ease;
+        }
+        body.dark { background-color: #121212; color: #e0e0e0; }
+        ::-webkit-scrollbar { display: none; }
+        .nav-wrapper, #footer-promo-container { display: none; }
+        main { padding: 1rem; }
+        .content-section { margin-bottom: 2rem; }
+        .kpi-card { background-color: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        body.dark .kpi-card { background-color: #1e1e1e; border: 1px solid #333; }
+        .interactive-box { transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .interactive-box.active { transform: scale(0.97); }
+        .vocab-details { display: none; }
+        .vocab-actions-popup { display: none; background-color: white; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; width: 120px; }
+        body.dark .vocab-actions-popup { background-color: #2c2c2c; }
+        #toast-notification { visibility: hidden; opacity: 0; transition: opacity 0.3s, visibility 0.3s; }
+        #toast-notification.show { visibility: visible; opacity: 1; }
+        .advanced-vocab-item { border-left: 4px solid #FF8C00; }
+        .back-button { position: fixed; top: 1rem; left: 1rem; z-index: 50; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></symbol>
+        <symbol id="icon-speaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></symbol>
+        <symbol id="icon-copy-notes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
+        <symbol id="icon-copy-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></symbol>
+        <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></symbol>
+        <symbol id="icon-more-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></symbol>
+    </svg>
+
+    <audio id="hanja-audio" preload="auto"></audio>
+    <a href="javascript:history.back()" class="back-button bg-white/70 backdrop-blur-sm p-2 rounded-full shadow-lg">
+        <svg class="w-6 h-6 text-gray-800"><use href="#icon-arrow-left"></use></svg>
+    </a>
+    <div class="relative min-h-screen">
+        <main class="flex-1">
+            <section id="overview" class="content-section">
+                <div class="grid grid-cols-1 gap-4">
+                    <div id="overview-hanja-box" class="kpi-card interactive-box flex items-center justify-center p-6 relative" tabindex="0">
+                        <div class="text-center">
+                            <h1 id="main-hanja" class="text-7xl font-semibold">[漢]</h1>
+                            <p id="overview-huneum" class="text-3xl text-gray-600 mt-2">[훈음]</p>
+                        </div>
+                        <div class="absolute bottom-3 right-3 flex items-center space-x-1">
+                            <button id="audio-play-btn" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300" title="음성 듣기"><svg class="w-5 h-5 text-gray-700"><use href="#icon-speaker"></use></svg></button>
+                            <button id="copy-notes-btn" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300" title="판서 내용 복사"><svg class="w-5 h-5 text-gray-700"><use href="#icon-copy-notes"></use></svg></button>
+                        </div>
+                    </div>
+                    <div id="overview-info-box" class="kpi-card interactive-box p-6">
+                        <div>
+                            <h2 class="text-xl font-bold mb-3 text-[#FF8C00]">한자 정보</h2>
+                            <p class="text-base mb-1"><strong>목차:</strong> <span id="overview-index"></span></p>
+                            <p class="text-base mb-1"><strong>전체 연번:</strong> <span id="overview-serial"></span></p>
+                            <p class="text-base"><strong>교과서 단어:</strong> <span id="overview-textbook"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="meaning" class="content-section">
+                <h2 class="text-2xl font-bold mb-4">✨ 해설</h2>
+                <div class="kpi-card p-6">
+                    <div id="meaning-explanation-box" class="p-4 mb-4 border-l-4 border-[#FF8C00]">
+                        <h3 id="explanation-title" class="text-xl font-bold mb-2 text-[#FF8C00]"></h3>
+                        <p id="explanation-text" class="text-base leading-relaxed"></p>
+                    </div>
+                    <div id="meanings-list" class="space-y-4"></div>
+                </div>
+            </section>
+            <section id="vocabulary" class="content-section">
+                <h2 class="text-2xl font-bold mb-4">📚 어휘</h2>
+                <div id="vocabulary-list" class="space-y-4"></div>
+            </section>
+            <section id="advanced-vocab" class="content-section">
+                 <h2 class="text-2xl font-bold mb-4">🚀 도약</h2>
+                 <div id="advanced-vocabulary-list" class="grid grid-cols-2 gap-3"></div>
+            </section>
+        </main>
+    </div>
+    <div id="toast-notification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-xl text-base"></div>
+    
+    <script>
+    // 이 스크립트 블록의 내용은 웹 버전과 완전히 동일합니다.
+    // 차이점은 HTML 구조와 CSS 뿐입니다.
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const hanjaId = params.get('id');
+            if (!hanjaId) throw new Error("한자 ID가 URL에 없습니다.");
+
+            const response = await fetch('./data/hanja_db.json');
+            if (!response.ok) throw new Error('데이터베이스 파일을 불러올 수 없습니다.');
+            const allHanjaData = await response.json();
+
+            const currentHanjaData = allHanjaData.find(item => item.id === hanjaId);
+
+            if (currentHanjaData) {
+                renderPage(currentHanjaData);
+                addAllEventListeners(currentHanjaData);
+            } else {
+                throw new Error("해당 ID의 한자 정보를 찾을 수 없습니다.");
+            }
+        } catch (error) {
+            console.error("페이지 로딩 오류:", error);
+            document.querySelector('main').innerHTML = `<div class="text-center p-10 text-red-600"><h1>오류 발생</h1><p>${error.message}</p></div>`;
+        }
+    });
+
+    // --- 페이지 렌더링 함수 ---
+    function renderPage(data) {
+        document.title = `[${data.id.replace('-', '권_')}] ${data.serial}_${data.huneum}`;
+        
+        // 개요
+        document.getElementById('main-hanja').textContent = data.hanja;
+        document.getElementById('overview-huneum').textContent = data.huneum;
+        document.getElementById('overview-index').textContent = `어사문 [${data.id.replace('-', '권_')}]`;
+        document.getElementById('overview-serial').textContent = data.serial;
+        document.getElementById('overview-textbook').textContent = data.textbook || '없음';
+
+        // 해설
+        document.getElementById('explanation-title').innerHTML = `${data.huneum} (<strong class="font-bold">${data.hanja}</strong>)`;
+        document.getElementById('explanation-text').textContent = data.explanation;
+        
+        const renderItems = (container, dataList, cardCreator) => {
+            if (container && dataList && dataList.length > 0) {
+                container.innerHTML = dataList.map(cardCreator).join('');
+            }
+        };
+
+        const createMeaningCardHTML = (m) => `
+            <div class="kpi-card p-4">
+                <h3 class="text-lg font-bold mb-1 text-[#4CAF50]">${m.title}</h3>
+                <p class="text-gray-700 text-sm">${m.definition.replace(/│/g, '')}</p>
+                <p class="text-xs italic text-gray-500 mt-1">예: ${m.example}</p>
+            </div>`;
+
+        const createVocabularyCardHTML = (v) => `
+            <div class="kpi-card interactive-box relative p-4" role="button" tabindex="0">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-lg font-bold flex-1 pr-2">${v.title.replace(/(\([^)]+\))/g, '<strong class="font-bold text-orange-600">$1</strong>')}</h3>
+                    <button class="vocab-actions-toggle p-2 -mr-2 -mt-2 rounded-full hover:bg-gray-100"><svg class="w-5 h-5 text-gray-500"><use href="#icon-more-vertical"></use></svg></button>
+                </div>
+                <div class="vocab-details mt-3 space-y-1 pt-3 border-t border-gray-200 text-sm">
+                    <p><strong>뜻:</strong> ${v.definition}</p>
+                    <p><strong>구성:</strong> ${v.composition}</p>
+                    ${v.analysis ? `<p><strong>풀이:</strong> ${v.analysis}</p>` : ''}
+                    <p><strong>예:</strong> ${v.example}</p>
+                </div>
+                <div class="vocab-actions-popup absolute top-9 right-1.5">
+                    <button class="copy-vocab w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md flex items-center text-sm">
+                        <svg class="w-4 h-4 mr-2"><use href="#icon-copy-text"></use></svg> 복사
+                    </button>
+                </div>
+            </div>`;
+
+        const createAdvancedVocabularyCardHTML = (av) => {
+             const [volume] = av.linkId.split('-');
+             return `
+                <div class="advanced-vocab-item interactive-box kpi-card p-4 flex flex-col justify-between">
+                    <h3 class="text-lg font-bold">${av.word}</h3>
+                    <div class="flex justify-end items-center mt-1">
+                         <a href="hanja-detail-app.html?id=${av.linkId}" class="vocab-link inline-flex items-center font-bold text-sm py-1 px-2 rounded-full transition-colors" data-volume="${volume}">
+                            ${av.linkId.replace('-', '권_')} <svg class="w-4 h-4 ml-1"><use href="#icon-arrow-right"></use></svg>
+                         </a>
+                    </div>
+                </div>`;
+        };
+        
+        renderItems(document.getElementById('meanings-list'), data.meanings, createMeaningCardHTML);
+        renderItems(document.getElementById('vocabulary-list'), data.vocabulary, createVocabularyCardHTML);
+        renderItems(document.getElementById('advanced-vocabulary-list'), data.advancedVocabulary, createAdvancedVocabularyCardHTML);
+    }
+    
+    // --- 이벤트 리스너 및 헬퍼 함수 ---
+    function addAllEventListeners(hanjaData) {
+        // 이 함수의 내용은 웹 버전과 100% 동일합니다.
+        const audioEl = document.getElementById('hanja-audio');
+        const audioFile = `./audio/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum}.wav`;
+        audioEl.src = audioFile;
+
+        document.getElementById('audio-play-btn')?.addEventListener('click', () => {
+            audioEl.currentTime = 0;
+            audioEl.play().catch(e => console.error("오디오 재생 오류:", e));
+        });
+
+        document.getElementById('copy-notes-btn')?.addEventListener('click', async () => {
+            const notesFile = `./notes/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum} (판서).txt`;
+            try {
+                const response = await fetch(notesFile);
+                if (!response.ok) throw new Error('파일을 찾을 수 없습니다.');
+                const text = await response.text();
+                await navigator.clipboard.writeText(text);
+                showToast('판서 내용이 복사되었습니다.');
+            } catch (err) {
+                console.error('판서 파일 복사 오류:', err);
+                showToast('판서 파일을 불러오는 데 실패했습니다.', 'error');
+            }
+        });
+        
+        document.querySelectorAll('.kpi-card[role="button"]').forEach(card => {
+            const details = card.querySelector('.vocab-details');
+            if (details) {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        details.style.display = details.style.display === 'none' || details.style.display === '' ? 'block' : 'none';
+                    }
+                });
+            }
+        });
+
+        document.querySelectorAll('.vocab-actions-toggle').forEach(button => {
+            const popup = button.closest('.kpi-card').querySelector('.vocab-actions-popup');
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+
+        document.querySelectorAll('.copy-vocab').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = button.closest('.kpi-card');
+                const title = card.querySelector('h3').textContent;
+                const detailsText = Array.from(card.querySelectorAll('.vocab-details p')).map(p => p.textContent).join('\n');
+                navigator.clipboard.writeText(`${title}\n${detailsText}`);
+                showToast(`'${title}' 어휘 정보가 복사되었습니다.`);
+                card.querySelector('.vocab-actions-popup').style.display = 'none';
+            });
+        });
+        
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.vocab-actions-popup').forEach(popup => {
+                if (!popup.closest('.kpi-card').contains(e.target)) {
+                    popup.style.display = 'none';
+                }
+            });
+        });
+
+        const getBadgeColorClasses = (volume) => {
+            const colors = [
+                '', // index 0 (unused)
+                'bg-red-200 text-red-800 hover:bg-red-300', 'bg-blue-200 text-blue-800 hover:bg-blue-300', 
+                'bg-green-200 text-green-800 hover:bg-green-300', 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300',
+                'bg-indigo-200 text-indigo-800 hover:bg-indigo-300', 'bg-purple-200 text-purple-800 hover:bg-purple-300',
+                'bg-pink-200 text-pink-800 hover:bg-pink-300', 'bg-teal-200 text-teal-800 hover:bg-teal-300', 
+                'bg-slate-300 text-slate-800 hover:bg-slate-400', 'bg-orange-300 text-orange-800 hover:bg-orange-400'
+            ];
+            return colors[parseInt(volume, 10)] || colors[0];
+        }
+
+        document.querySelectorAll('.vocab-link').forEach(link => {
+            const volume = link.dataset.volume;
+            if (volume) { link.className += ' ' + getBadgeColorClasses(volume); }
+        });
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast-notification');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = `fixed bottom-5 left-1/2 -translate-x-1/2 text-white py-2 px-4 rounded-lg shadow-xl text-base ${type === 'error' ? 'bg-red-600' : 'bg-gray-800'} show`;
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+    </script>
+</body>
+</html>

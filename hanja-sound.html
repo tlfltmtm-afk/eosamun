@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>목차 - 한자음 순서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <style>
+        /* old.html의 스타일을 기반으로 재구성 + 요청된 스타일 추가 */
+        :root {
+            --header-height: 56px; /* 새 헤더 높이 */
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #FFFDE7;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-wrapper {
+            position: fixed;
+            left: 0;
+            right: 0;
+            z-index: 20;
+            transition: height 0.3s ease-in-out;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        /* --- New Header Styles --- */
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background-color: #FFD700; /* 헤더 배경색 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 현재 페이지를 나타내는 활성 링크 스타일 */
+        .nav-link.active {
+            background-color: #FBBF24; /* 활성 링크 배경색 */
+        }
+
+        /* 툴팁 스타일 */
+        .tooltip-container {
+            position: relative;
+        }
+
+        .tooltip-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out;
+            pointer-events: none;
+        }
+
+        .tooltip-container:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Existing Styles Adjusted --- */
+        #secondary-nav {
+            top: var(--header-height); /* 헤더 높이만큼 아래로 */
+            background-color: #FFFACD;
+        }
+        main {
+            transition: padding-top 0.3s ease-in-out;
+            padding-top: calc(var(--header-height) + 2rem);
+        }
+        h3[id] {
+            transition: scroll-margin-top 0.3s ease-in-out;
+            scroll-margin-top: calc(var(--header-height) + 1rem);
+        }
+        .nav-content-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* flex-start에서 center로 변경 */
+            align-items: center;
+            gap: 0.35rem 0.5rem;
+            padding: 0.5rem 0;
+            width: 100%;
+        }
+        .nav-button-base {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+        .nav-button-base:hover, .nav-button-base.active {
+            background-color: #FFC107;
+            border-color: #FF8F00;
+        }
+
+        /* --- New List Styles --- */
+        .index-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .hanja-item-box {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid #E5E7EB;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .hanja-item-box:hover {
+            border-color: #FBBF24;
+            background-color: #FEFCE8;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .hanja-item-box:active {
+            transform: scale(0.98);
+            background-color: #FDE68A;
+        }
+        .sound-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #3B82F6;
+            color: white;
+            font-weight: bold;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            min-width: 44px;
+            height: 32px;
+            font-size: 1rem;
+        }
+        
+        .hidden { display: none; }
+
+        /* ▼▼▼▼▼ 검색 팝업 관련 스타일 ▼▼▼▼▼ */
+        .search-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 40;
+        }
+        .search-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+        }
+        /* ▲▲▲▲▲ 검색 팝업 관련 스타일 ▲▲▲▲▲ */
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- New Fixed Header -->
+    <header class="header-fixed h-14 flex items-center justify-center px-4">
+        <nav class="flex items-center space-x-2 sm:space-x-4">
+            <!-- 홈 버튼 (SVG 아이콘) -->
+            <a href="index.html" class="nav-link p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
+                <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            </a>
+            <!-- 연번 버튼 (텍스트) -->
+            <a href="serial-order.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="연번" data-tooltip="어사문 교재 순서대로">
+                연번
+            </a>
+            <!-- 한자 버튼 (텍스트) - Active State -->
+            <a href="hanja-sound.html" class="nav-link active px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="한자음" data-tooltip="한자의 음 ㄱㄴㄷ 순서대로">
+                한자
+            </a>
+            <!-- 어휘 버튼 (텍스트) -->
+            <a href="vocabulary.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="어휘" data-tooltip="어휘의 ㄱㄴㄷ 순서대로">
+                어휘
+            </a>
+        </nav>
+    </header>
+
+    <!-- 자음별 빠른 이동 네비게이션 (old.html 구조) -->
+    <div id="secondary-nav" class="nav-wrapper">
+        <div class="h-full px-4 sm:px-6 lg:px-8 w-full">
+            <div id="secondary-nav-content" class="nav-content-container"></div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <main id="main-content" class="px-4 sm:px-6 lg:px-8">
+        <section id="hanja-sound" class="mb-12">
+            <div id="content-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <!-- 데이터 로딩 메시지 -->
+                <div id="loading" class="text-center p-10 font-semibold text-amber-600">목차를 불러오는 중입니다...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="text-center p-8 mt-10 text-sm text-gray-500">
+        <p>왕관유자샘의 어휘 향상 프로젝트</p>
+    </footer>
+
+    <!-- ▼▼▼▼▼ 플로팅 검색 버튼 및 팝업창 HTML ▼▼▼▼▼ -->
+    <button id="search-fab" class="fixed bottom-6 right-6 bg-amber-500 text-white p-4 rounded-full shadow-lg hover:bg-amber-600 transition-colors z-30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    </button>
+
+    <div id="search-modal-overlay" class="search-modal-overlay hidden"></div>
+    <div id="search-modal" class="search-modal hidden w-full max-w-sm">
+        <div class="bg-white rounded-lg shadow-xl p-6 relative">
+            <form id="search-form" class="flex items-center space-x-2">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" id="search-input" class="w-full pl-10 pr-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none" placeholder="검색어 입력">
+                </div>
+                <button type="submit" class="p-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span class="sr-only">Search</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- ▲▲▲▲▲ 플로팅 검색 버튼 및 팝업창 HTML ▲▲▲▲▲ -->
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- DOM 요소 선택 ---
+        const contentContainer = document.getElementById('content-container');
+        const loadingEl = document.getElementById('loading');
+        const secondaryNav = document.getElementById('secondary-nav');
+        const secondaryNavContent = document.getElementById('secondary-nav-content');
+        const mainContent = document.getElementById('main-content');
+
+        // --- 데이터 로딩 및 렌더링 (new.html 로직) ---
+        const getConsonant = (char) => {
+            const f = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+            if (!char) return null;
+            const code = char.charCodeAt(0) - 44032;
+            if (code < 0 || code > 11171) return null;
+            return f[Math.floor(code / 588)];
+        };
+
+        const renderContent = async () => {
+            try {
+                const response = await fetch('./data/search_index.json');
+                if (!response.ok) throw new Error('Failed to load index file.');
+                const data = await response.json();
+
+                const groupedByConsonant = data.reduce((acc, item) => {
+                    const sounds = item.sound.split(/[,/ ]+/);
+                    sounds.forEach(sound => {
+                        const consonant = getConsonant(sound.trim()[0]);
+                        if (consonant) {
+                            if (!acc[consonant]) acc[consonant] = [];
+                            acc[consonant].push(item);
+                        }
+                    });
+                    return acc;
+                }, {});
+                
+                const sortedConsonants = Object.keys(groupedByConsonant).sort((a, b) => a.localeCompare(b, 'ko-KR'));
+
+                let htmlContent = '<h2 class="text-2xl sm:text-3xl font-bold mb-6 text-[#FF8C00] border-b-2 border-amber-300 pb-3">ㄱ-ㅎ 한자음 순서</h2>';
+                sortedConsonants.forEach(consonant => {
+                    htmlContent += `<h3 id="hanja-${consonant}" class="text-xl font-semibold mt-8 mb-4 text-amber-800">${consonant}</h3>`;
+                    htmlContent += '<div class="index-list">';
+                    
+                    const uniqueItems = Array.from(new Map(groupedByConsonant[consonant].map(item => [item.id, item])).values());
+                    const sortedItems = uniqueItems.sort((a, b) => a.sound.localeCompare(b.sound, 'ko-KR'));
+                    
+                    sortedItems.forEach(item => {
+                        const idFormatted = `[${item.id.replace('-', '권_')}]`;
+                        htmlContent += `
+                            <a href="hanja-detail.html?id=${item.id}" class="hanja-item-box text-lg">
+                                <span class="sound-box">${item.sound}</span>
+                                <span class="ml-4">${item.huneum}(${item.hanja})</span>
+                                <span class="ml-auto font-semibold text-red-600">${idFormatted}</span>
+                            </a>
+                        `;
+                    });
+                    htmlContent += '</div>';
+                });
+                
+                contentContainer.innerHTML = htmlContent;
+                loadingEl.classList.add('hidden');
+
+                // 콘텐츠 렌더링 후 네비게이션 설정
+                setupNavigation();
+
+            } catch (error) {
+                loadingEl.textContent = '목차를 불러오는 데 실패했습니다.';
+                console.error(error);
+            }
+        };
+
+        // --- 네비게이션 및 스크롤 처리 (old.html 로직) ---
+        const setupNavigation = () => {
+            const h3Elements = document.querySelectorAll('h3[id]');
+            const navData = {
+                hanja: ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'].map(c => ({ text: c, href: `#hanja-${c}` }))
+            };
+
+            function populateNav(container, items) {
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const targetElement = document.querySelector(item.href);
+                    if (!targetElement) return;
+
+                    const el = document.createElement('a');
+                    el.className = 'nav-button-base';
+                    el.textContent = item.text;
+                    el.href = item.href;
+                    container.appendChild(el);
+                });
+            }
+
+            function updateLayout() {
+                let secondaryHeight = 0;
+                if (secondaryNav.classList.contains('active')) {
+                    secondaryNav.style.height = 'auto';
+                    let currentHeight = secondaryNav.scrollHeight;
+                    if (currentHeight > 16) {
+                       secondaryHeight = currentHeight;
+                    }
+                }
+                secondaryNav.style.height = `${secondaryHeight}px`;
+
+                // JS가 CSS 변수를 사용하여 padding과 margin을 동적으로 조정합니다.
+                const headerHeightVar = 'var(--header-height)';
+                mainContent.style.paddingTop = `calc(${headerHeightVar} + ${secondaryHeight}px + 2rem)`;
+                h3Elements.forEach(h3 => {
+                    h3.style.scrollMarginTop = `calc(${headerHeightVar} + ${secondaryHeight}px + 1rem)`;
+                });
+            }
+
+            secondaryNav.addEventListener('click', (e) => {
+                const button = e.target.closest('.nav-button-base');
+                if (!button) return;
+                e.preventDefault();
+                
+                const href = button.getAttribute('href');
+                if (href) {
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+                requestAnimationFrame(updateLayout);
+            });
+
+            // Intersection Observer를 사용하여 스크롤 위치에 따라 활성 버튼 업데이트
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        const activeLink = secondaryNavContent.querySelector(`a[href="#${id}"]`);
+                        
+                        secondaryNavContent.querySelectorAll('.nav-button-base').forEach(btn => btn.classList.remove('active'));
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--header-height').trim()} 0px -60% 0px` });
+
+            h3Elements.forEach(h3 => observer.observe(h3));
+            
+            // 네비게이션 메뉴 생성 및 레이아웃 업데이트
+            populateNav(secondaryNavContent, navData.hanja);
+            secondaryNav.classList.add('active');
+            requestAnimationFrame(updateLayout);
+        };
+        
+        // ▼▼▼▼▼ 검색 팝업 관련 스크립트 ▼▼▼▼▼
+        const searchFab = document.getElementById('search-fab');
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModal = document.getElementById('search-modal');
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+
+        function openModal() {
+            searchModalOverlay.classList.remove('hidden');
+            searchModal.classList.remove('hidden');
+            searchInput.focus();
+        }
+
+        function closeModal() {
+            searchModalOverlay.classList.add('hidden');
+            searchModal.classList.add('hidden');
+        }
+
+        searchFab.addEventListener('click', openModal);
+        searchModalOverlay.addEventListener('click', closeModal);
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+        // ▲▲▲▲▲ 검색 팝업 관련 스크립트 ▲▲▲▲▲
+
+        // --- 초기 실행 ---
+        renderContent();
+    });
+    </script>
+</body>
+</html>

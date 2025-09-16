@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어사문 - 홈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #FFFDE7;
+            color: #333333;
+        }
+        main { padding-top: 4rem; padding-bottom: 4rem; }
+        .circle-button {
+            display: flex;
+            flex-direction: column;
+            height: 135px;
+            width: 135px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .circle-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        #toast-notification {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            transform: translateX(-50%);
+        }
+        #toast-notification.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+    <!-- SVG Icon Definitions -->
+    <svg class="hidden">
+      <defs>
+        <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20v2H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+          <path d="M4 5h16v12H4V5z"/>
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+        </symbol>
+      </defs>
+    </svg>
+
+    <header class="text-center pt-16 pb-8">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-[#FF8C00] drop-shadow-sm">어사문</h1>
+        <p class="mt-2 text-lg md:text-xl text-gray-600">어휘가 사고력과 문해력을 키운다</p>
+    </header>
+
+    <main class="container mx-auto px-4 flex flex-col items-center flex-grow">
+        <!-- First row of buttons -->
+        <div class="flex justify-center w-full mb-4 md:mb-8">
+            <div class="grid grid-cols-3 gap-4 md:gap-8">
+                <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
+                    <span class="text-5xl">🔢</span>
+                    <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
+                </a>
+                <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
+                    <span class="text-5xl">🀄</span>
+                    <span class="mt-1 text-lg font-semibold text-gray-800">한자</span>
+                </a>
+                <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
+                    <span class="text-5xl">📖</span>
+                    <span class="mt-1 text-lg font-semibold text-gray-800">어휘</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Second row of buttons -->
+        <div class="flex justify-center w-full">
+             <div class="grid grid-cols-2 gap-4 md:gap-8">
+                <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
+                    <span class="text-5xl">🔍</span>
+                    <span class="mt-1 text-lg font-semibold">검색</span>
+                </a>
+                <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
+                    <span class="text-5xl leading-none">🤖</span>
+                    <span class="mt-1 text-lg font-semibold">AI챗봇</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
+        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
+            <div class="text-center text-gray-800 font-semibold">
+                <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
+                <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+            </div>
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
+                    <span class="font-semibold text-gray-700">교재 구입하기</span>
+                </a>
+                <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
+                    <span class="font-semibold text-gray-700">앱 다운로드</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    <div class="text-center text-sm text-gray-500 pb-4">
+        <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .then(() => console.log('Service Worker Registered'));
+        });
+      }
+
+      // Simple toast notification function
+      const showToast = (message) => {
+        const toast = document.getElementById('toast-notification');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // Example links - replace with actual URLs
+      document.getElementById('buy-book-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('현재 준비되지 않음');
+        // window.location.href = 'YOUR_PURCHASE_LINK';
+      });
+
+      document.getElementById('download-app-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('현재 준비되지 않음');
+        // window.location.href = 'YOUR_APP_DOWNLOAD_LINK';
+      });
+    </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>검색</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <style>
+        body { 
+            font-family: "Paperlogy", sans-serif; 
+            background-color: #FFFBEB; /* amber-50 */
+            padding-top: 56px; /* Header height */
+            padding-bottom: 80px; 
+        }
+        .header-fixed {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+            background-color: #FFD700; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result-item a:active {
+            transform: scale(0.98);
+            background-color: #f9fafb;
+        }
+        .highlight {
+            background-color: #FDE68A; /* amber-200 */
+            border-radius: 3px;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid #D97706;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 2rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        .toast-notification.show {
+            opacity: 1;
+        }
+        /* Active Nav Link Style */
+        .nav-link.active {
+            background-color: #FBBF24; /* amber-400 */
+        }
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+        }
+        .tooltip-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out;
+            pointer-events: none;
+        }
+        .tooltip-container:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Footer Styles */
+        .interactive-box {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .interactive-box:focus, .interactive-box:hover {
+            border-color: #FBBF24; /* amber-400 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="header-fixed h-14 flex items-center justify-center px-4">
+        <nav class="flex items-center space-x-4">
+            <a href="index.html" class="nav-link active p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
+                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            </a>
+            <a href="serial-order.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="연번" data-tooltip="어사문 교재 순서대로">
+                연번
+            </a>
+            <a href="hanja-sound.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="한자음" data-tooltip="한자의 음 ㄱㄴㄷ 순서대로">
+                한자
+            </a>
+            <a href="vocabulary.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="어휘" data-tooltip="어휘의 ㄱㄴㄷ 순서대로">
+                어휘
+            </a>
+        </nav>
+    </header>
+
+    <main class="p-4 max-w-2xl mx-auto">
+        <!-- 검색 입력 섹션 -->
+        <section class="my-6">
+            <div class="relative">
+                <input type="search" id="search-input" placeholder="검색어 입력" class="w-full pl-12 pr-4 py-3 text-lg bg-white border-2 border-amber-500 rounded-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-sm">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-4">
+                    <svg id="search-icon" class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 검색 결과 및 안내 섹션 -->
+        <section id="results-section">
+            <div id="guidance-text" class="text-center text-gray-500 py-8">
+                궁금한 어휘(한자, 단어 등)를 검색해 보세요.
+            </div>
+            <div id="results-container" class="space-y-3">
+                <!-- Search results will be appended here -->
+            </div>
+        </section>
+
+        <!-- 검색 결과가 없을 때 표시되는 섹션 -->
+        <section id="no-results-section" class="hidden mt-8 text-center">
+             <p id="no-results-message" class="text-gray-800 font-semibold text-lg mb-6"></p>
+            <div class="space-y-4">
+                <a id="ai-chatbot-link" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
+                    <!-- Text will be injected by JS -->
+                </a>
+                <a id="korean-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
+                    <!-- Text will be injected by JS -->
+                </a>
+                <a id="hanja-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
+                    <!-- Text will be injected by JS -->
+                </a>
+            </div>
+        </section>
+
+        <!-- 하단 외부 링크 섹션 -->
+        <section class="mt-12 pt-8 border-t-2 border-amber-200">
+            <div class="max-w-xl mx-auto">
+                <div class="grid grid-cols-3 gap-4">
+                    <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow hover:shadow-md transition text-center">
+                        <span class="text-4xl">🤖</span>
+                        <span class="font-bold mt-2">AI 챗봇</span>
+                    </a>
+                    <a href="https://ko.dict.naver.com/#/main" target="_blank" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow hover:shadow-md transition text-center">
+                        <span class="text-4xl">📖</span>
+                        <span class="font-bold mt-2">국어사전</span>
+                    </a>
+                    <a href="https://hanja.dict.naver.com/" target="_blank" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow hover:shadow-md transition text-center">
+                        <span class="text-4xl">📖</span>
+                        <span class="font-bold mt-2">한자사전</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ▼▼▼▼▼ 추가된 하단 푸터 섹션 ▼▼▼▼▼ -->
+        <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
+            <div id="purchase-box" tabindex="0" class="interactive-box w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
+                <div class="text-center text-gray-800 font-semibold">
+                    <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
+                    <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+                </div>
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                        <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
+                        <span class="font-semibold text-gray-700">교재 구입하기</span>
+                    </a>
+                    <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                        <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
+                        <span class="font-semibold text-gray-700">앱 다운로드</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
+        <div class="text-center text-sm text-gray-500 pb-4">
+            <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
+        </div>
+        <!-- ▲▲▲▲▲ 추가된 하단 푸터 섹션 ▲▲▲▲▲ -->
+    </main>
+    
+    <!-- ▼▼▼▼▼ SVG 아이콘 정의 ▼▼▼▼▼ -->
+    <svg class="hidden">
+      <defs>
+        <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20v2H6.5A2.5 2.5 0 0 1 4 16.5v-11A2.5 2.5 0 0 1 6.5 3H20v14H6.5A2.5 2.5 0 0 1 4 14.5v-9z"></path>
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </symbol>
+      </defs>
+    </svg>
+    <!-- ▲▲▲▲▲ SVG 아이콘 정의 ▲▲▲▲▲ -->
+     
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            const resultsContainer = document.getElementById('results-container');
+            const guidanceText = document.getElementById('guidance-text');
+            const noResultsSection = document.getElementById('no-results-section');
+            const noResultsMessage = document.getElementById('no-results-message');
+            const aiChatbotLink = document.getElementById('ai-chatbot-link');
+            const koreanDictionaryLink = document.getElementById('korean-dictionary-link');
+            const hanjaDictionaryLink = document.getElementById('hanja-dictionary-link');
+            let searchData = [];
+
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+            
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.className = 'toast-notification';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 2000);
+            }
+
+            const performSearch = (query) => {
+                const trimmedQuery = query.trim();
+                if (trimmedQuery.length < 1) {
+                    displayResults([], trimmedQuery);
+                    return;
+                }
+
+                const lowerCaseQuery = trimmedQuery.toLowerCase();
+                const results = new Map();
+
+                searchData.forEach(item => {
+                    let matchReason = '';
+                    if (item.huneum && item.huneum.toLowerCase().includes(lowerCaseQuery)) {
+                        matchReason = `훈음 '<span class="highlight">${item.huneum}</span>'에서 발견됨`;
+                    } else {
+                        const vocabMatch = (item.vocabulary || []).find(v => v.title && v.title.toLowerCase().includes(lowerCaseQuery));
+                        if (vocabMatch) {
+                            matchReason = `학습 어휘 '<span class="highlight">${vocabMatch.title.split('(')[0]}</span>'에서 발견됨`;
+                        } else {
+                            const advVocabMatch = (item.advancedVocabulary || []).find(av => av.word && av.word.toLowerCase().includes(lowerCaseQuery));
+                            if (advVocabMatch) {
+                                matchReason = `도약 어휘 '<span class="highlight">${advVocabMatch.word.split('(')[0]}</span>'에서 발견됨`;
+                            }
+                        }
+                    }
+                    
+                    if (matchReason && !results.has(item.id)) {
+                        results.set(item.id, { ...item, matchReason });
+                    }
+                });
+
+                displayResults(Array.from(results.values()), trimmedQuery);
+            };
+
+            const displayResults = (results, query) => {
+                resultsContainer.innerHTML = '';
+                guidanceText.classList.add('hidden');
+                noResultsSection.classList.add('hidden');
+
+                if (query === '') {
+                    guidanceText.textContent = '궁금한 어휘를 검색해 보세요.';
+                    guidanceText.classList.remove('hidden');
+                    return;
+                }
+                
+                if (results.length === 0) {
+                    noResultsMessage.textContent = '어사문에는 없는 단어입니다.';
+                    
+                    const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 inline-block ml-1"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" /></svg>`;
+
+                    aiChatbotLink.innerHTML = `
+                        <div class="text-center">
+                            <p class="font-semibold text-lg flex items-center justify-center">
+                                <span class="text-blue-600">AI 챗봇에서 </span>
+                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
+                                <span class="text-blue-600"> 학습하기</span>
+                                ${arrowIcon}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">검색어가 자동 복사됩니다. 챗봇에 붙여 넣으세요.</p>
+                        </div>`;
+                    
+                    koreanDictionaryLink.innerHTML = `
+                        <div class="text-center">
+                            <p class="font-semibold text-lg flex items-center justify-center">
+                                <span class="text-blue-600">국어사전에서 </span>
+                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
+                                <span class="text-blue-600"> 검색하기</span>
+                                ${arrowIcon}
+                            </p>
+                        </div>`;
+                    
+                    hanjaDictionaryLink.innerHTML = `
+                        <div class="text-center">
+                            <p class="font-semibold text-lg flex items-center justify-center">
+                                <span class="text-blue-600">한자사전에서 </span>
+                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
+                                <span class="text-blue-600"> 검색하기</span>
+                                ${arrowIcon}
+                            </p>
+                        </div>`;
+
+                    koreanDictionaryLink.href = `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(query)}`;
+                    hanjaDictionaryLink.href = `https://hanja.dict.naver.com/search?query=${encodeURIComponent(query)}`;
+                    aiChatbotLink.dataset.query = query;
+                    noResultsSection.classList.remove('hidden');
+
+                } else {
+                    guidanceText.innerHTML = `총 <span class="font-bold text-amber-600">${results.length}개</span>의 결과를 찾았습니다.`;
+                    guidanceText.classList.remove('hidden');
+                    const resultsHtml = results.map(item => `
+                        <div class="result-item">
+                            <a href="hanja-detail.html?id=${item.id}" class="block p-5 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-200">
+                                <div class="flex items-start space-x-5">
+                                    <div class="text-5xl text-amber-800">${item.hanja}</div>
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between items-baseline">
+                                            <p class="text-2xl font-bold text-gray-800">${item.huneum}</p>
+                                            <p class="text-sm text-gray-500 font-medium whitespace-nowrap pl-4">[${item.id.replace('-', '권 ')}]</p>
+                                        </div>
+                                        <p class="text-base text-gray-500 mt-1">${item.matchReason}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    `).join('');
+                    resultsContainer.innerHTML = resultsHtml;
+                }
+            };
+
+            const init = async () => {
+                try {
+                    guidanceText.innerHTML = '<div class="loader"></div>데이터베이스 로딩 중...';
+                    const response = await fetch('./data/hanja_db.json');
+                    if (!response.ok) throw new Error('DB 로딩 실패');
+                    searchData = await response.json();
+                    
+                    searchInput.disabled = false;
+                    searchInput.focus();
+                    
+                    // URL에서 검색어를 읽어와서 바로 검색을 실행합니다.
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const queryFromUrl = urlParams.get('q');
+                    
+                    if (queryFromUrl) {
+                        const decodedQuery = decodeURIComponent(queryFromUrl);
+                        searchInput.value = decodedQuery;
+                        performSearch(decodedQuery);
+                    } else {
+                        guidanceText.textContent = '궁금한 어휘를 검색해 보세요.';
+                    }
+
+                } catch (error) {
+                    guidanceText.textContent = '데이터를 불러오는 데 실패했습니다. 네트워크를 확인해주세요.';
+                    console.error(error);
+                }
+            };
+
+            const debouncedSearch = debounce(performSearch, 300);
+            searchInput.addEventListener('input', () => debouncedSearch(searchInput.value));
+            searchInput.disabled = true;
+            
+            aiChatbotLink.addEventListener('click', (e) => {
+                const query = e.currentTarget.dataset.query;
+                if (!query) return;
+
+                const tempInput = document.createElement('textarea');
+                tempInput.value = query;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                showToast(`'${query}'가 클립보드에 복사되었습니다.`);
+            });
+
+            init();
+        });
+    </script>
+</body>
+</html>
+
