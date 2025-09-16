@@ -12,7 +12,8 @@
         body {
             font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI",Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             background-color: #FFFDE7; color: #333333;
-            padding-top: calc(var(--topbar-height) + 20px); /* 헤더 공간 확보 */
+            /* 상단바가 fixed이므로 콘텐츠가 가려지지 않게 body에 padding을 다시 추가합니다. */
+            padding-top: calc(var(--topbar-height) + 20px); 
         }
         ::-webkit-scrollbar { width: 12px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -155,7 +156,7 @@
     <audio id="hanja-audio" preload="auto"></audio>
 
     <div class="relative min-h-screen">
-        <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm" style="height: var(--topbar-height);">
+        <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm transition-transform duration-300" style="height: var(--topbar-height);">
             <div class="flex justify-center items-center h-full px-4 max-w-5xl mx-auto">
                 <div class="flex items-center space-x-6">
                     <a href="index.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="홈"><svg class="w-7 h-7 text-amber-900"><use href="#icon-home"></use></svg></a>
@@ -268,7 +269,6 @@
         </div>
     </div>
 
-
     <div id="audio-controls" class="hidden fixed bottom-5 right-5 z-40 flex">
         <button id="audio-play-pause-btn"><svg class="w-4 h-4"><use href="#icon-play"></use></svg></button>
     </div>
@@ -370,7 +370,6 @@
     let firstKeydown = true;
 
     function addAllEventListeners(hanjaData, allHanjaData) {
-        // 마우스가 움직이면 'using-keyboard' 클래스를 제거합니다.
         document.addEventListener('mousemove', () => {
             if (isKeyboardMode) {
                 isKeyboardMode = false;
@@ -386,13 +385,8 @@
 
         document.querySelectorAll('.kpi-card').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Ignore clicks on inner buttons or links
                 if (e.target.closest('button, a')) return;
-
-                // Remove highlight from the previously clicked card
                 document.querySelector('.kpi-card.last-clicked')?.classList.remove('last-clicked');
-                
-                // Highlight the currently clicked card
                 card.classList.add('last-clicked');
             });
         });
@@ -412,11 +406,7 @@
         document.getElementById('audio-play-pause-btn').addEventListener('click', toggleAudioPause);
         
         document.querySelectorAll('.kpi-card[role="button"]').forEach(card => card.addEventListener('click', function(e) {
-            // 키보드 모드일 때 실제 마우스 클릭(e.detail > 0)을 방지합니다.
-            // 프로그래밍 방식의 click() 호출(e.detail === 0)은 허용합니다.
-            if (isKeyboardMode && e.detail !== 0) {
-                return;
-            }
+            if (isKeyboardMode && e.detail !== 0) return;
             if (e.target.closest('button, a')) return;
             const details = card.querySelector('.vocab-details');
             if (details) {
@@ -426,7 +416,7 @@
                 if (!wasOpen) {
                     setTimeout(() => {
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 500); // Transition is 0.5s
+                    }, 500);
                 }
             }
         }));
@@ -438,6 +428,8 @@
         document.querySelectorAll('.vocab-link').forEach(link => link.className += ' ' + getBadgeColorClasses(link.dataset.volume));
 
         document.addEventListener('keydown', handleShortcuts);
+        // 스크롤 이벤트 리스너를 다시 추가합니다.
+        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
         
         document.querySelectorAll('.modal-popup').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -450,7 +442,6 @@
         document.querySelectorAll('.modal-popup.open').forEach(p => p.classList.remove('open'));
     }
     
-    // --- Popups (Modals) ---
     const syllableModal = document.getElementById('syllable-modal');
     function handleSyllableAnalysis(e, allHanjaData) {
         e.stopPropagation();
@@ -495,7 +486,6 @@
         actionsModal.classList.add('open');
     }
 
-    // --- Audio Controls ---
     const audioEl = document.getElementById('hanja-audio');
     const audioControls = document.getElementById('audio-controls');
     const playPauseBtn = document.getElementById('audio-play-pause-btn');
@@ -513,6 +503,23 @@
     }
 
     // --- Other Handlers ---
+    // 스크롤 핸들러 함수를 요청하신 기능에 맞게 수정합니다.
+    function handleHeaderScroll() {
+        const topbar = document.getElementById('topbar');
+        const currentScrollY = window.scrollY;
+        
+        if (topbar) {
+            // 스크롤 위치가 10px보다 크면 (즉, 최상단이 아니면) 상단바를 숨깁니다.
+            if (currentScrollY > 10) {
+                topbar.style.transform = 'translateY(-100%)';
+            } 
+            // 스크롤 위치가 최상단이면 상단바를 보여줍니다.
+            else {
+                topbar.style.transform = 'translateY(0%)';
+            }
+        }
+    }
+
     async function copyNotes(hanjaData) {
         const notesFile = `./notes/[${hanjaData.id.replace('-', '권_')}]${hanjaData.serial}_${hanjaData.huneum} (판서).txt`;
         try {
@@ -554,22 +561,16 @@
     }
 
     function handleShortcuts(e) {
-        // 페이지 로드 후 첫 키보드 입력에 대한 특별 처리
         if (firstKeydown) {
-            // 키보드 모드 활성화
             if (!isKeyboardMode) {
                 isKeyboardMode = true;
                 document.body.classList.add('using-keyboard');
             }
-            
-            // 아직 아무 요소에도 포커스가 없다면 오디오 버튼에 포커스를 줍니다.
             if (document.activeElement === document.body || document.activeElement === null) {
                 document.getElementById('audio-play-btn')?.focus();
             }
-            
-            // 첫 키 입력 처리가 끝났음을 표시하고, 이 키 입력이 다른 동작(예: 화살표 키 내비게이션)을 유발하지 않도록 여기서 함수를 종료합니다.
             firstKeydown = false;
-            e.preventDefault(); // 화살표 키 등의 기본 동작(스크롤 등) 방지
+            e.preventDefault();
             return;
         }
 
