@@ -19,14 +19,23 @@
         .circle-button {
             display: flex;
             flex-direction: column;
-            height: 135px;
-            width: 135px;
+            /* Mobile-first: smaller size for small screens */
+            height: 120px;
+            width: 120px;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             text-decoration: none;
+            flex-shrink: 0; /* Prevent buttons from shrinking to force wrapping */
+        }
+        /* Larger size for medium screens (desktop) and up */
+        @media (min-width: 768px) {
+            .circle-button {
+                height: 135px;
+                width: 135px;
+            }
         }
         .circle-button:hover {
             transform: translateY(-5px) scale(1.05);
@@ -66,36 +75,28 @@
     </header>
 
     <main class="container mx-auto px-4 flex flex-col items-center flex-grow">
-        <!-- First row of buttons -->
-        <div class="flex justify-center w-full mb-4 md:mb-8">
-            <div class="grid grid-cols-3 gap-4 md:gap-8">
-                <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
-                    <span class="text-5xl">🔢</span>
-                    <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
-                </a>
-                <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
-                    <span class="text-5xl">🀄</span>
-                    <span class="mt-1 text-lg font-semibold text-gray-800">한자</span>
-                </a>
-                <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
-                    <span class="text-5xl">📖</span>
-                    <span class="mt-1 text-lg font-semibold text-gray-800">어휘</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Second row of buttons -->
-        <div class="flex justify-center w-full">
-             <div class="grid grid-cols-2 gap-4 md:gap-8">
-                <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
-                    <span class="text-5xl">🔍</span>
-                    <span class="mt-1 text-lg font-semibold">검색</span>
-                </a>
-                <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
-                    <span class="text-5xl leading-none">🤖</span>
-                    <span class="mt-1 text-lg font-semibold">AI챗봇</span>
-                </a>
-            </div>
+        <!-- Buttons Container -->
+        <div class="flex flex-wrap justify-center gap-4 md:gap-8">
+            <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
+                <span class="text-5xl">🔢</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
+            </a>
+            <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
+                <span class="text-5xl">🀄</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">한자</span>
+            </a>
+            <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
+                <span class="text-5xl">📖</span>
+                <span class="mt-1 text-lg font-semibold text-gray-800">어휘</span>
+            </a>
+            <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
+                <span class="text-5xl">🔍</span>
+                <span class="mt-1 text-lg font-semibold">검색</span>
+            </a>
+            <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
+                <span class="text-5xl leading-none">🤖</span>
+                <span class="mt-1 text-lg font-semibold">AI챗봇</span>
+            </a>
         </div>
     </main>
 
@@ -144,15 +145,16 @@
       // Example links - replace with actual URLs
       document.getElementById('buy-book-link').addEventListener('click', (e) => {
         e.preventDefault();
-        showToast('현재 준비되지 않음');
+        showToast('교재 구입 페이지로 이동합니다.');
         // window.location.href = 'YOUR_PURCHASE_LINK';
       });
 
       document.getElementById('download-app-link').addEventListener('click', (e) => {
         e.preventDefault();
-        showToast('현재 준비되지 않음');
+        showToast('앱 다운로드 페이지로 이동합니다.');
         // window.location.href = 'YOUR_APP_DOWNLOAD_LINK';
       });
     </script>
 </body>
 </html>
+
