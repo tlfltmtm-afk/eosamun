@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>목차 - 어휘 순서</title>
+    <title>목차 - 어휘 순서 (모바일 최적화)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
     <meta name="theme-color" content="#FFD700">
@@ -12,36 +12,32 @@
         body {
             font-family: "Paperlogy", sans-serif;
             background-color: #fefce8; /* bg-yellow-50 */
-            /* Initial padding is set dynamically by JavaScript after content loads */
             transition: padding-top 0.3s ease;
         }
 
-        /* --- New 3-Row Header Styles --- */
-
-        /* 1st Row: Main Navigation */
+        /* --- Header Styles --- */
         .header-fixed {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 20; /* Highest z-index */
+            z-index: 20;
             background-color: #FFD700;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .nav-link.active {
-            background-color: #FBBF24; /* Active link background color */
+            background-color: #FBBF24;
         }
         
-        /* 2nd & 3rd Row: Filter Container */
         .filter-container-fixed {
             position: fixed;
-            top: 56px; /* Positioned below the main 56px header */
+            top: 56px;
             left: 0;
             right: 0;
             z-index: 10;
             transition: all 0.3s ease-out;
-            background-color: rgba(254, 243, 199, 0.8); /* bg-amber-100/80 */
+            background-color: rgba(254, 243, 199, 0.8);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -61,13 +57,13 @@
         
         .primary-btn {
             background-color: white;
-            border: 1px solid #e5e7eb; /* gray-200 */
+            border: 1px solid #e5e7eb;
         }
 
         .primary-btn.active {
             font-weight: 700;
             color: white;
-            background-color: #F97316; /* orange-500 */
+            background-color: #F97316;
             border-color: #F97316;
         }
 
@@ -90,10 +86,7 @@
         }
 
         /* --- Tooltip Styles --- */
-        .tooltip-container {
-            position: relative;
-        }
-
+        .tooltip-container { position: relative; }
         .tooltip-container::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -113,11 +106,7 @@
             transition: opacity 0.2s ease-in-out;
             pointer-events: none;
         }
-
-        .tooltip-container:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
+        .tooltip-container:hover::after { opacity: 1; visibility: visible; }
 
         /* Animation for new content */
         @keyframes fadeIn {
@@ -128,24 +117,15 @@
             animation: fadeIn 0.4s ease-out forwards;
         }
 
-        /* ▼▼▼▼▼ 검색 팝업 관련 스타일 ▼▼▼▼▼ */
+        /* Search Modal Styles */
         .search-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 40;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6); z-index: 40;
         }
         .search-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
-        /* ▲▲▲▲▲ 검색 팝업 관련 스타일 ▲▲▲▲▲ */
 
         /* Utility Styles */
         .hidden { display: none; }
@@ -228,12 +208,11 @@
             const listContainer = document.getElementById('list-container');
             const body = document.body;
 
-            // --- Helper Function ---
             const updateBodyPadding = () => {
                 setTimeout(() => {
                     if (mainHeader && filterContainer) {
                         const totalHeight = mainHeader.offsetHeight + filterContainer.offsetHeight;
-                        body.style.paddingTop = `${totalHeight + 16}px`; // Add 16px buffer
+                        body.style.paddingTop = `${totalHeight + 16}px`;
                     }
                 }, 310);
             };
@@ -255,7 +234,6 @@
                 loadingEl.innerHTML = `<p class="text-red-500">${error.message}</p>`;
             }
 
-            // --- 데이터 가공 함수 ---
             function processAllVocab(data) {
                 const vocabMap = new Map();
                 data.forEach(hanja => {
@@ -297,10 +275,8 @@
                 return grouped;
             }
             
-            // --- 2nd-level Filter Scrolling Logic ---
             function manageScrollButtons() {
                 const checkScroll = () => {
-                    // Timeout to ensure DOM has updated scrollWidth
                     setTimeout(() => {
                         const isScrollable = secondaryFilter.scrollWidth > secondaryFilter.clientWidth;
                         
@@ -321,12 +297,10 @@
                 };
                 
                 secondaryFilter.addEventListener('scroll', checkScroll);
-                window.addEventListener('resize', checkScroll); // Re-check on resize
-                checkScroll(); // Initial check
+                window.addEventListener('resize', checkScroll);
+                checkScroll();
             }
 
-
-            // --- 렌더링 함수 ---
             function renderPrimaryFilter(consonants) {
                 primaryFilter.innerHTML = consonants.map(c => 
                     `<button class="primary-btn text-lg py-2 px-4 rounded-lg shadow-sm flex-shrink-0" data-consonant="${c}">${c}</button>`
@@ -350,21 +324,27 @@
                  }
                 const sortedSyllables = Object.keys(data[consonant]).sort((a,b) => a.localeCompare(b, 'ko-KR'));
                 const subGroupsHtml = sortedSyllables.map(syllable => {
-                    const itemsHtml = data[consonant][syllable].map(item => `
-                        <div class="vocab-item">
-                            <a href="hanja-detail.html?id=${item.linkId}" class="flex items-center bg-white p-4 rounded-xl border border-gray-200 mb-3 shadow-sm transition-all duration-100 active:scale-[0.98] active:bg-yellow-200 active:border-yellow-300 hover:shadow-md">
-                                <div class="flex-shrink-0 w-12 h-10 mr-4 bg-blue-500 text-white text-lg font-bold flex items-center justify-center rounded-lg">${item.word[0]}</div>
-                                <span class="flex-grow text-lg text-gray-800">${item.word}</span>
-                                <span class="text-base text-red-500 font-semibold">[${item.linkId.replace('-', '권_')}]</span>
+                    // [수정] 어휘 목록 아이템의 HTML 구조를 2단으로 변경
+                    const itemsHtml = data[consonant][syllable].map(item => {
+                        const idFormatted = `[${item.linkId.replace('-', '권_')}]`;
+                        return `
+                            <a href="hanja-detail.html?id=${item.linkId}" class="block bg-white p-3 rounded-lg border border-gray-200 mb-2 shadow-sm transition-all duration-100 active:scale-[0.98] active:bg-yellow-200 hover:shadow-md">
+                                <div class="w-full flex flex-col">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 w-12 h-10 mr-4 bg-blue-500 text-white text-lg font-bold flex items-center justify-center rounded-lg">${item.word[0]}</div>
+                                        <span class="flex-grow text-lg text-gray-800">${item.word}</span>
+                                    </div>
+                                    <p class="mt-2 font-semibold text-red-600 text-sm text-right">${idFormatted}</p>
+                                </div>
                             </a>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
 
                     if (itemsHtml) {
                         return `
                             <div id="subgroup-${syllable}" class="pt-4">
                                 <h3 class="text-xl font-bold text-gray-600 pb-2 mb-3 border-b border-gray-300">${syllable}</h3>
-                                ${itemsHtml}
+                                <div class="flex flex-col gap-1">${itemsHtml}</div>
                             </div>`;
                     }
                     return '';
@@ -381,8 +361,6 @@
                 listContainer.innerHTML = groupHtml;
             }
 
-
-            // --- 이벤트 리스너 함수 (UPDATED) ---
             function attachEventListeners(data, sortedConsonants) {
                 let activePrimaryBtn = null;
 
@@ -441,7 +419,6 @@
                 });
             }
 
-            // ▼▼▼▼▼ 검색 팝업 관련 스크립트 ▼▼▼▼▼
             const searchFab = document.getElementById('search-fab');
             const searchModalOverlay = document.getElementById('search-modal-overlay');
             const searchModal = document.getElementById('search-modal');
@@ -469,7 +446,6 @@
                     window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
                 }
             });
-            // ▲▲▲▲▲ 검색 팝업 관련 스크립트 ▲▲▲▲▲
         });
     </script>
 </body>
