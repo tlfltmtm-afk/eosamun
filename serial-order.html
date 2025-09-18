@@ -8,32 +8,82 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
     <meta name="theme-color" content="#FFD700">
     <style>
-        /* 헤더 높이만큼 body에 padding-top을 적용하고 배경색을 수정합니다. */
-        body { 
-            font-family: "Paperlogy", sans-serif; 
+        /* --- 통합 헤더 스타일 --- */
+        body {
+            font-family: "Paperlogy", sans-serif;
             background-color: #fefce8; /* amber-50 */
-            padding-top: 112px; /* Header height (56px + 56px) */
+            transition: padding-top 0.3s ease; /* 부드러운 전환 효과 */
         }
-        
+
+        /* 1. 메인 메뉴 상단바 */
         .header-fixed {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 10;
-            background-color: #FFD700; /* 헤더 배경색 */
+            z-index: 20;
+            background-color: #FFD700;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         .nav-link.active {
             background-color: #FBBF24;
             font-weight: 700;
         }
 
-        .tooltip-container {
-            position: relative;
+        /* 2. 필터 메뉴 컨테이너 (2, 3차 메뉴 래퍼) */
+        .filter-container-fixed {
+            position: fixed;
+            top: 56px; /* 1차 상단바 바로 아래 */
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background-color: rgba(254, 243, 199, 0.8); /* amber-100/80 */
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease-out;
         }
 
+        /* 3. 필터 버튼 (공통) */
+        .filter-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 1rem; /* 좌우 여백 추가 */
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-button {
+            flex-shrink: 0; /* 버튼이 줄어들지 않도록 설정 */
+            scroll-snap-align: start;
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            font-size: 1.125rem; /* text-lg */
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: white;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* shadow-sm */
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .filter-button:hover {
+            border-color: #FBBF24;
+            background-color: #FEFCE8;
+        }
+        .filter-button.active {
+            font-weight: 700; /* bold */
+            color: white;
+            background-color: #F97316; /* orange-500 */
+            border-color: #F97316;
+        }
+
+        /* 4. 기타 유틸리티 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hidden { display: none; }
+        
+        /* 툴팁 스타일 */
+        .tooltip-container { position: relative; }
         .tooltip-container::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -53,35 +103,9 @@
             transition: opacity 0.2s ease-in-out;
             pointer-events: none;
         }
-
-        .tooltip-container:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
+        .tooltip-container:hover::after { opacity: 1; visibility: visible; }
         
-        .volume-btn-container {
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .volume-btn {
-            scroll-snap-align: start;
-            transition: all 0.2s ease-in-out;
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-        }
-        .volume-btn.active {
-            font-weight: 700;
-            color: #1f2937;
-            background-color: #FBBF24;
-            border-color: transparent;
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
+        /* 한자 아이템 리스트 스타일 */
         .hanja-item a {
             display: flex;
             align-items: center;
@@ -101,62 +125,50 @@
             border-color: #fde68a;
             box-shadow: none;
         }
-
         .serial-number {
             font-weight: 700;
             color: #EA580C;
             flex-shrink: 0;
         }
-        .hidden { display: none; }
         
-        /* ▼▼▼▼▼ 검색 팝업 관련 스타일 ▼▼▼▼▼ */
+        /* 검색 팝업 관련 스타일 */
         .search-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 40;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6); z-index: 40;
         }
         .search-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
-        /* ▲▲▲▲▲ 검색 팝업 관련 스타일 ▲▲▲▲▲ */
-
     </style>
 </head>
 <body class="antialiased">
     
-    <header class="header-fixed">
-        <div class="h-14 flex items-center justify-center px-4">
-            <nav class="flex items-center space-x-4">
-                <a href="index.html" class="nav-link p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
-                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                </a>
-                <a href="serial-order.html" class="nav-link active px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="연번" data-tooltip="어사문 교재 순서대로">
-                    연번
-                </a>
-                <a href="hanja-sound.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="한자음" data-tooltip="한자의 음 ㄱㄴㄷ 순서대로">
-                    한자
-                </a>
-                <a href="vocabulary.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="어휘" data-tooltip="어휘의 ㄱㄴㄷ 순서대로">
-                    어휘
-                </a>
-            </nav>
-        </div>
-        
-        <nav id="volume-filter" class="flex items-center justify-start space-x-3 px-4 bg-amber-100 h-14 overflow-x-auto no-scrollbar volume-btn-container">
-            </nav>
+    <header class="header-fixed h-14 flex items-center justify-center px-4">
+        <nav class="flex items-center space-x-2 sm:space-x-4">
+            <a href="index.html" class="nav-link p-2 rounded-lg hover:bg-amber-400 transition-colors tooltip-container" aria-label="홈" data-tooltip="홈으로 이동">
+                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            </a>
+            <a href="serial-order.html" class="nav-link active px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="연번" data-tooltip="어사문 교재 순서대로">
+                연번
+            </a>
+            <a href="hanja-sound.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="한자음" data-tooltip="한자의 음 ㄱㄴㄷ 순서대로">
+                한자
+            </a>
+            <a href="vocabulary.html" class="nav-link px-3 py-2 rounded-lg hover:bg-amber-400 transition-colors font-semibold text-gray-800 tooltip-container" aria-label="어휘" data-tooltip="어휘의 ㄱㄴㄷ 순서대로">
+                어휘
+            </a>
+        </nav>
     </header>
+
+    <div id="filter-container" class="filter-container-fixed">
+        <nav id="volume-filter" class="filter-nav h-14 space-x-3 no-scrollbar justify-start">
+            </nav>
+    </div>
     
-    <main class="p-4">
+    <main id="main-content" class="p-4">
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <div id="main-content">
+            <div id="list-container">
                  <div id="loading" class="text-center py-10 text-gray-500">
                     목록을 불러오는 중...
                 </div>
@@ -187,12 +199,26 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const mainContent = document.getElementById('main-content');
+            const listContainer = document.getElementById('list-container');
             const loadingEl = document.getElementById('loading');
             const volumeFilter = document.getElementById('volume-filter');
 
             let allHanjaData = [];
             let currentVolume = 'all';
+
+            // --- 모든 페이지 공통 레이아웃 관리 스크립트 ---
+            const mainHeader = document.querySelector('.header-fixed');
+            const filterContainer = document.getElementById('filter-container');
+            const body = document.body;
+
+            function updateBodyPadding() {
+                setTimeout(() => {
+                    if (mainHeader && filterContainer) {
+                        const totalHeight = mainHeader.offsetHeight + filterContainer.offsetHeight;
+                        body.style.paddingTop = `${totalHeight + 16}px`;
+                    }
+                }, 100);
+            }
 
             try {
                 const response = await fetch('./data/hanja_db.json');
@@ -204,23 +230,25 @@
                 loadingEl.classList.add('hidden');
                 setupFilters();
                 renderList();
+                updateBodyPadding(); // 초기 로드 시 패딩 설정
 
             } catch (error) {
                 loadingEl.innerHTML = `<p class="text-red-500">${error.message}</p>`;
             }
 
             function setupFilters() {
-                let filterHtml = `<button class="volume-btn text-lg py-2 px-3 flex-shrink-0 active" data-volume="all">전체</button>`;
+                let filterHtml = `<button class="filter-button active" data-volume="all">전체</button>`;
                 for (let i = 1; i <= 10; i++) {
-                    filterHtml += `<button class="volume-btn text-lg py-2 px-3 flex-shrink-0" data-volume="${i}">${i}권</button>`;
+                    filterHtml += `<button class="filter-button" data-volume="${i}">${i}권</button>`;
                 }
                 volumeFilter.innerHTML = filterHtml;
 
                 volumeFilter.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'BUTTON') {
+                    const button = e.target.closest('button');
+                    if (button) {
                         volumeFilter.querySelector('.active').classList.remove('active');
-                        e.target.classList.add('active');
-                        currentVolume = e.target.dataset.volume;
+                        button.classList.add('active');
+                        currentVolume = button.dataset.volume;
                         renderList();
                     }
                 });
@@ -232,7 +260,7 @@
                     : allHanjaData.filter(item => item.id.startsWith(currentVolume + '-'));
 
                 if (filteredData.length === 0) {
-                    mainContent.innerHTML = `<p class="text-center py-10 text-gray-500">해당 권의 한자가 없습니다.</p>`;
+                    listContainer.innerHTML = `<p class="text-center py-10 text-gray-500">해당 권의 한자가 없습니다.</p>`;
                     return;
                 }
 
@@ -248,11 +276,10 @@
                         </div>
                     `;
                 }).join('');
-
-                mainContent.innerHTML = listHtml;
+                listContainer.innerHTML = listHtml;
             }
 
-            // ▼▼▼▼▼ 검색 팝업 관련 스크립트 ▼▼▼▼▼
+            // 검색 팝업 관련 스크립트
             const searchFab = document.getElementById('search-fab');
             const searchModalOverlay = document.getElementById('search-modal-overlay');
             const searchModal = document.getElementById('search-modal');
@@ -280,7 +307,9 @@
                     window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
                 }
             });
-            // ▲▲▲▲▲ 검색 팝업 관련 스크립트 ▲▲▲▲▲
+            
+            // 창 크기 변경 시에도 padding 업데이트
+            window.addEventListener('resize', updateBodyPadding);
         });
     </script>
 </body>

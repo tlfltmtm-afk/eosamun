@@ -8,52 +8,88 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
     <meta name="theme-color" content="#FFD700">
     <style>
-        /* old.html의 스타일을 기반으로 재구성 + 요청된 스타일 추가 */
-        :root {
-            --header-height: 56px; /* 새 헤더 높이 */
-        }
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
+
+        /* --- 통합 헤더 스타일 --- */
         body {
-            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            background-color: #FFFDE7;
-            color: #333333;
-            margin: 0;
-            padding: 0;
-        }
-        .nav-wrapper {
-            position: fixed;
-            left: 0;
-            right: 0;
-            z-index: 20;
-            transition: height 0.3s ease-in-out;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%;
+            font-family: "Paperlogy", sans-serif;
+            background-color: #fefce8; /* amber-50 */
+            transition: padding-top 0.3s ease; /* 부드러운 전환 효과 */
         }
 
-        /* --- New Header Styles --- */
+        /* 1. 메인 메뉴 상단바 */
         .header-fixed {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 10;
-            background-color: #FFD700; /* 헤더 배경색 */
+            z-index: 20;
+            background-color: #FFD700;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        /* 현재 페이지를 나타내는 활성 링크 스타일 */
         .nav-link.active {
-            background-color: #FBBF24; /* 활성 링크 배경색 */
+            background-color: #FBBF24;
+            font-weight: 700;
         }
+
+        /* 2. 필터 메뉴 컨테이너 (2, 3차 메뉴 래퍼) */
+        .filter-container-fixed {
+            position: fixed;
+            top: 56px; /* 1차 상단바 바로 아래 */
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background-color: rgba(254, 243, 199, 0.8); /* amber-100/80 */
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease-out;
+        }
+
+        /* 3. 필터 버튼 (공통) */
+        .filter-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 1rem; /* 좌우 여백 추가 */
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-button {
+            flex-shrink: 0; /* 버튼이 줄어들지 않도록 설정 */
+            scroll-snap-align: start;
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            font-size: 1.125rem; /* text-lg */
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: white;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* shadow-sm */
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+        }
+        .filter-button:hover {
+            border-color: #FBBF24;
+            background-color: #FEFCE8;
+        }
+        .filter-button.active {
+            font-weight: 700; /* bold */
+            color: white;
+            background-color: #F97316; /* orange-500 */
+            border-color: #F97316;
+        }
+
+        /* 4. 기타 유틸리티 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hidden { display: none; }
+        
+        h3[id] { transition: scroll-margin-top 0.3s ease-in-out; }
 
         /* 툴팁 스타일 */
-        .tooltip-container {
-            position: relative;
-        }
-
+        .tooltip-container { position: relative; }
         .tooltip-container::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -73,113 +109,37 @@
             transition: opacity 0.2s ease-in-out;
             pointer-events: none;
         }
-
-        .tooltip-container:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* --- Existing Styles Adjusted --- */
-        #secondary-nav {
-            top: var(--header-height); /* 헤더 높이만큼 아래로 */
-            background-color: #FFFACD;
-        }
-        main {
-            transition: padding-top 0.3s ease-in-out;
-            padding-top: calc(var(--header-height) + 2rem);
-        }
-        h3[id] {
-            transition: scroll-margin-top 0.3s ease-in-out;
-            scroll-margin-top: calc(var(--header-height) + 1rem);
-        }
-        .nav-content-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* flex-start에서 center로 변경 */
-            align-items: center;
-            gap: 0.35rem 0.5rem;
-            padding: 0.5rem 0;
-            width: 100%;
-        }
-        .nav-button-base {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            background-color: #FFFFFF;
-            border: 1px solid #E0E0E0;
-            transition: all 0.2s ease-in-out;
-            text-decoration: none;
-            color: #333;
-            cursor: pointer;
-        }
-        .nav-button-base:hover, .nav-button-base.active {
-            background-color: #FFC107;
-            border-color: #FF8F00;
-        }
-
-        /* --- New List Styles --- */
-        .index-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+        .tooltip-container:hover::after { opacity: 1; visibility: visible; }
+        
+        /* 리스트 아이템 스타일 */
+        .index-list { display: flex; flex-direction: column; gap: 0.5rem; }
         .hanja-item-box {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.25rem;
-            background-color: white;
-            border-radius: 0.5rem;
-            border: 1px solid #E5E7EB;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s ease-in-out;
+            display: flex; align-items: center; padding: 0.75rem 1.25rem;
+            background-color: white; border-radius: 0.5rem; border: 1px solid #E5E7EB;
+            text-decoration: none; color: inherit; transition: all 0.2s ease-in-out;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .hanja-item-box:hover {
-            border-color: #FBBF24;
-            background-color: #FEFCE8;
+            border-color: #FBBF24; background-color: #FEFCE8;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
-        .hanja-item-box:active {
-            transform: scale(0.98);
-            background-color: #FDE68A;
-        }
+        .hanja-item-box:active { transform: scale(0.98); background-color: #FDE68A; }
         .sound-box {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #3B82F6;
-            color: white;
-            font-weight: bold;
-            border-radius: 0.375rem;
-            padding: 0.25rem 0.75rem;
-            min-width: 44px;
-            height: 32px;
-            font-size: 1rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: #3B82F6; color: white; font-weight: bold;
+            border-radius: 0.375rem; padding: 0.25rem 0.75rem;
+            min-width: 44px; height: 32px; font-size: 1rem;
         }
-        
-        .hidden { display: none; }
 
-        /* ▼▼▼▼▼ 검색 팝업 관련 스타일 ▼▼▼▼▼ */
+        /* 검색 팝업 관련 스타일 */
         .search-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 40;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6); z-index: 40;
         }
         .search-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
-        /* ▲▲▲▲▲ 검색 팝업 관련 스타일 ▲▲▲▲▲ */
     </style>
 </head>
 <body class="antialiased">
@@ -201,10 +161,9 @@
         </nav>
     </header>
 
-    <div id="secondary-nav" class="nav-wrapper">
-        <div class="h-full px-4 sm:px-6 lg:px-8 w-full">
-            <div id="secondary-nav-content" class="nav-content-container"></div>
-        </div>
+    <div id="filter-container" class="filter-container-fixed">
+        <nav id="secondary-filter" class="filter-nav h-14 space-x-2 no-scrollbar justify-start">
+             </nav>
     </div>
 
     <main id="main-content" class="px-4 sm:px-6 lg:px-8">
@@ -242,14 +201,28 @@
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // --- DOM 요소 선택 ---
         const contentContainer = document.getElementById('content-container');
         const loadingEl = document.getElementById('loading');
-        const secondaryNav = document.getElementById('secondary-nav');
-        const secondaryNavContent = document.getElementById('secondary-nav-content');
-        const mainContent = document.getElementById('main-content');
+        const secondaryFilter = document.getElementById('secondary-filter');
+        
+        // --- 모든 페이지 공통 레이아웃 관리 스크립트 ---
+        const mainHeader = document.querySelector('.header-fixed');
+        const filterContainer = document.getElementById('filter-container');
+        const body = document.body;
 
-        // --- 데이터 로딩 및 렌더링 (new.html 로직) ---
+        function updateBodyPadding() {
+            setTimeout(() => {
+                if (mainHeader && filterContainer) {
+                    const totalHeight = mainHeader.offsetHeight + filterContainer.offsetHeight;
+                    body.style.paddingTop = `${totalHeight + 16}px`;
+                    
+                    document.querySelectorAll('h3[id]').forEach(h3 => {
+                        h3.style.scrollMarginTop = `${totalHeight + 16}px`;
+                    });
+                }
+            }, 100);
+        }
+
         const getConsonant = (char) => {
             const f = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
             if (!char) return null;
@@ -301,9 +274,8 @@
                 
                 contentContainer.innerHTML = htmlContent;
                 loadingEl.classList.add('hidden');
-
-                // 콘텐츠 렌더링 후 네비게이션 설정
-                setupNavigation();
+                
+                setupNavigation(sortedConsonants);
 
             } catch (error) {
                 loadingEl.textContent = '목차를 불러오는 데 실패했습니다.';
@@ -311,101 +283,50 @@
             }
         };
 
-        // --- 네비게이션 및 스크롤 처리 (old.html 로직) ---
-        const setupNavigation = () => {
+        const setupNavigation = (consonants) => {
             const h3Elements = document.querySelectorAll('h3[id]');
-            const navData = {
-                hanja: ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'].map(c => ({ text: c, href: `#hanja-${c}` }))
-            };
+            
+            secondaryFilter.innerHTML = consonants.map(c => 
+                `<a href="#hanja-${c}" class="filter-button">${c}</a>`
+            ).join('');
+            
+            updateBodyPadding(); // 필터 생성 후 padding 업데이트
 
-            function populateNav(container, items) {
-                container.innerHTML = '';
-                items.forEach(item => {
-                    const targetElement = document.querySelector(item.href);
-                    if (!targetElement) return;
-
-                    const el = document.createElement('a');
-                    el.className = 'nav-button-base';
-                    el.textContent = item.text;
-                    el.href = item.href;
-                    container.appendChild(el);
-                });
-            }
-
-            function updateLayout() {
-                let secondaryHeight = 0;
-                if (secondaryNav.classList.contains('active')) {
-                    secondaryNav.style.height = 'auto';
-                    let currentHeight = secondaryNav.scrollHeight;
-                    if (currentHeight > 16) {
-                       secondaryHeight = currentHeight;
-                    }
-                }
-                secondaryNav.style.height = `${secondaryHeight}px`;
-
-                // JS가 CSS 변수를 사용하여 padding과 margin을 동적으로 조정합니다.
-                const headerHeightVar = 'var(--header-height)';
-                mainContent.style.paddingTop = `calc(${headerHeightVar} + ${secondaryHeight}px + 2rem)`;
-                h3Elements.forEach(h3 => {
-                    h3.style.scrollMarginTop = `calc(${headerHeightVar} + ${secondaryHeight}px + 1rem)`;
-                });
-            }
-
-            secondaryNav.addEventListener('click', (e) => {
-                const button = e.target.closest('.nav-button-base');
+            secondaryFilter.addEventListener('click', (e) => {
+                const button = e.target.closest('a.filter-button');
                 if (!button) return;
                 e.preventDefault();
                 
-                const href = button.getAttribute('href');
-                if (href) {
-                    const targetElement = document.querySelector(href);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                const targetId = button.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-                requestAnimationFrame(updateLayout);
             });
 
-            // Intersection Observer를 사용하여 스크롤 위치에 따라 활성 버튼 업데이트
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const id = entry.target.getAttribute('id');
-                        const activeLink = secondaryNavContent.querySelector(`a[href="#${id}"]`);
-                        
-                        secondaryNavContent.querySelectorAll('.nav-button-base').forEach(btn => btn.classList.remove('active'));
-                        if (activeLink) {
-                            activeLink.classList.add('active');
-                        }
+                        secondaryFilter.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                        const activeLink = secondaryFilter.querySelector(`a[href="#${id}"]`);
+                        if (activeLink) activeLink.classList.add('active');
                     }
                 });
-            }, { rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--header-height').trim()} 0px -60% 0px` });
+            }, { rootMargin: `-120px 0px -60% 0px` }); // 헤더 높이를 고려하여 rootMargin 조정
 
             h3Elements.forEach(h3 => observer.observe(h3));
-            
-            // 네비게이션 메뉴 생성 및 레이아웃 업데이트
-            populateNav(secondaryNavContent, navData.hanja);
-            secondaryNav.classList.add('active');
-            requestAnimationFrame(updateLayout);
         };
         
-        // ▼▼▼▼▼ 검색 팝업 관련 스크립트 ▼▼▼▼▼
+        // 검색 팝업 관련 스크립트
         const searchFab = document.getElementById('search-fab');
         const searchModalOverlay = document.getElementById('search-modal-overlay');
         const searchModal = document.getElementById('search-modal');
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
 
-        function openModal() {
-            searchModalOverlay.classList.remove('hidden');
-            searchModal.classList.remove('hidden');
-            searchInput.focus();
-        }
-
-        function closeModal() {
-            searchModalOverlay.classList.add('hidden');
-            searchModal.classList.add('hidden');
-        }
+        function openModal() { searchModalOverlay.classList.remove('hidden'); searchModal.classList.remove('hidden'); searchInput.focus(); }
+        function closeModal() { searchModalOverlay.classList.add('hidden'); searchModal.classList.add('hidden'); }
 
         searchFab.addEventListener('click', openModal);
         searchModalOverlay.addEventListener('click', closeModal);
@@ -417,10 +338,9 @@
                 window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
             }
         });
-        // ▲▲▲▲▲ 검색 팝업 관련 스크립트 ▲▲▲▲▲
-
-        // --- 초기 실행 ---
+        
         renderContent();
+        window.addEventListener('resize', updateBodyPadding);
     });
     </script>
 </body>
