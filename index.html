@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>어사문 - 홈</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text-css"/>
     <meta name="theme-color" content="#FFD700">
     <style>
         html { scroll-behavior: smooth; }
@@ -13,22 +13,23 @@
             font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             background-color: #FFFDE7;
             color: #333333;
-            /* 높이가 화면을 꽉 채우도록 설정하여 콘텐츠가 중앙에 오도록 합니다. */
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
         main { 
-            /* 섹션 간의 공간을 줄이기 위해 padding 값 수정 */
             padding-top: 1.5rem; 
             padding-bottom: 1.5rem; 
         }
         .circle-button {
             display: flex;
             flex-direction: column;
-            /* 버튼 크기를 원래대로 복구 */
-            height: 120px;
-            width: 120px;
+            /* 화면 너비에 따라 크기가 조절되도록 vw 단위 사용 */
+            width: 28vw;
+            height: 28vw;
+            /* 너무 커지지 않도록 최대 크기 지정 */
+            max-width: 100px;
+            max-height: 100px;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
@@ -37,11 +38,29 @@
             text-decoration: none;
             flex-shrink: 0; 
         }
-        /* 데스크탑 화면에서 버튼 크기 조정 */
+        .button-icon {
+            /* 아이콘 폰트 크기도 화면 너비에 따라 조절 */
+            font-size: 12vw;
+            line-height: 1;
+        }
+        .button-text {
+            /* 텍스트 폰트 크기도 화면 너비에 따라 조절 */
+            font-size: 4vw;
+        }
+
+        /* 데스크탑 화면에서는 버튼과 폰트 크기를 고정 값으로 더 크게 조정 */
         @media (min-width: 768px) {
             .circle-button {
-                height: 135px;
                 width: 135px;
+                height: 135px;
+                max-width: 135px;
+                max-height: 135px;
+            }
+            .button-icon {
+                font-size: 3rem; /* 48px */
+            }
+            .button-text {
+                font-size: 1.125rem; /* 18px */
             }
         }
         
@@ -76,70 +95,68 @@
       </defs>
     </svg>
 
-    <!-- 헤더의 상하 여백(padding)을 줄임 -->
     <header class="text-center pt-8 pb-4">
         <h1 class="text-5xl md:text-6xl font-extrabold text-[#FF8C00] drop-shadow-sm">어사문</h1>
         <p class="mt-2 text-lg md:text-xl text-gray-600">어휘가 사고력과 문해력을 키운다</p>
     </header>
 
-    <!-- flex-grow를 사용하여 main 영역이 남은 공간을 채우도록 함 -->
     <main class="container mx-auto px-4 flex flex-col items-center justify-center flex-grow">
-        <!-- 버튼들을 한 행에 배치하고, 공간이 부족하면 줄바꿈(flex-wrap)되도록 설정 -->
-        <div class="flex flex-wrap justify-center gap-4 md:gap-8">
-            <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
-                <!-- 아이콘과 텍스트 크기를 원래대로 복구 -->
-                <span class="text-5xl">🔢</span>
-                <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
-            </a>
-            <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
-                <span class="text-5xl">🀄</span>
-                <span class="mt-1 text-lg font-semibold text-gray-800">한자</span>
-            </a>
-            <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
-                <span class="text-5xl">📖</span>
-                <span class="mt-1 text-lg font-semibold text-gray-800">어휘</span>
-            </a>
-            <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
-                <span class="text-5xl">🔍</span>
-                <span class="mt-1 text-lg font-semibold">검색</span>
-            </a>
-            <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
-                <span class="text-5xl leading-none">🤖</span>
-                <span class="mt-1 text-lg font-semibold">AI챗봇</span>
-            </a>
+        <!-- 버튼들을 두 줄로 나누어 배치 -->
+        <div class="w-full flex flex-col items-center gap-y-4">
+            <!-- 첫 번째 줄 -->
+            <div class="flex justify-center gap-x-4 w-full">
+                <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
+                    <span class="button-icon">🔢</span>
+                    <span class="button-text mt-1 font-semibold text-gray-800">연번</span>
+                </a>
+                <a href="hanja-sound.html" class="circle-button bg-white" title="한자 음">
+                    <span class="button-icon">🀄</span>
+                    <span class="button-text mt-1 font-semibold text-gray-800">한자</span>
+                </a>
+                <a href="vocabulary.html" class="circle-button bg-white" title="어휘 목록">
+                    <span class="button-icon">📖</span>
+                    <span class="button-text mt-1 font-semibold text-gray-800">어휘</span>
+                </a>
+            </div>
+            <!-- 두 번째 줄 -->
+            <div class="flex justify-center gap-x-4 w-full">
+                <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
+                    <span class="button-icon">🔍</span>
+                    <span class="button-text mt-1 font-semibold">검색</span>
+                </a>
+                <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="circle-button bg-[#FF8C00] text-white" title="왕관유자봇에게 물어보기">
+                    <span class="button-icon">🤖</span>
+                    <span class="button-text mt-1 font-semibold">AI챗봇</span>
+                </a>
+            </div>
         </div>
     </main>
 
-    <!-- 푸터의 상하 여백(margin)을 줄임 -->
     <footer id="footer-promo-container" class="my-5 flex justify-center items-center px-4">
         <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6">
             <div class="text-center text-gray-800 font-semibold">
                 <p class="text-base">👑 왕관유자샘의 어휘력 시리즈 🍊</p>
                 <p class="mt-2 text-base">💡 어•사•문 교재와 함께 공부해요. 💡</p>
             </div>
-            <!-- 버튼들을 한 행에 나란히 배치하기 위해 flex 사용 -->
             <div class="mt-4 flex flex-row gap-4">
                 <a href="#" id="buy-book-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                     <svg class="w-5 h-5 mr-2 text-amber-600"><use href="#icon-book"></use></svg>
-                    <!-- 버튼 텍스트 수정 -->
                     <span class="font-semibold text-gray-700">도서 구입</span>
                 </a>
                 <a href="#" id="download-app-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                     <svg class="w-5 h-5 mr-2 text-sky-600"><use href="#icon-download"></use></svg>
-                    <!-- 버튼 텍스트 수정 -->
                     <span class="font-semibold text-gray-700">앱 설치</span>
                 </a>
             </div>
         </div>
     </footer>
-    <div class="text-center text-sm text-gray-500 pb-4">
+    <div class="text-center text-xs text-gray-500 pb-4">
         <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
     </div>
 
     <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
 
     <script>
-      // Simple toast notification function
       const showToast = (message) => {
         const toast = document.getElementById('toast-notification');
         toast.textContent = message;
@@ -149,17 +166,14 @@
         }, 3000);
       }
 
-      // Example links - replace with actual URLs
       document.getElementById('buy-book-link').addEventListener('click', (e) => {
         e.preventDefault();
         showToast('현재 준비되지 않음');
-        // window.location.href = 'YOUR_PURCHAS_LINK';
       });
 
       document.getElementById('download-app-link').addEventListener('click', (e) => {
         e.preventDefault();
         showToast('현재 준비되지 않음');
-        // window.location.href = 'YOUR_APP_DOWNLOAD_LINK';
       });
     </script>
 </body>
