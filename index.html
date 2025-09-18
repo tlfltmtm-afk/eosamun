@@ -13,21 +13,24 @@
             font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             background-color: #FFFDE7;
             color: #333333;
-            height: 100vh;
+            /* 최소 높이를 화면 전체로 설정하고, 컨텐츠가 넘칠 경우 스크롤 허용 */
+            min-height: 100vh; 
             display: flex;
             flex-direction: column;
+            /* 섹션 사이의 공간을 균등하게 배분하여 화면을 채웁니다. */
+            justify-content: space-around;
         }
         main { 
-            padding-top: 1.5rem; 
-            padding-bottom: 1.5rem; 
+            /* 내부 컨텐츠 정렬을 위해 flex 사용 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .circle-button {
             display: flex;
             flex-direction: column;
-            /* 화면 너비에 따라 크기가 조절되도록 vw 단위 사용 */
             width: 28vw;
             height: 28vw;
-            /* 너무 커지지 않도록 최대 크기 지정 */
             max-width: 100px;
             max-height: 100px;
             align-items: center;
@@ -39,16 +42,13 @@
             flex-shrink: 0; 
         }
         .button-icon {
-            /* 아이콘 폰트 크기도 화면 너비에 따라 조절 */
             font-size: 12vw;
             line-height: 1;
         }
         .button-text {
-            /* 텍스트 폰트 크기도 화면 너비에 따라 조절 */
             font-size: 4vw;
         }
 
-        /* 데스크탑 화면에서는 버튼과 폰트 크기를 고정 값으로 더 크게 조정 */
         @media (min-width: 768px) {
             .circle-button {
                 width: 135px;
@@ -80,7 +80,7 @@
         }
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen">
+<body class="antialiased">
     <svg class="hidden">
       <defs>
         <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -95,15 +95,16 @@
       </defs>
     </svg>
 
-    <header class="text-center pt-8 pb-4">
+    <!-- 헤더의 상하 여백을 제거하여 flexbox가 공간을 관리하도록 함 -->
+    <header class="text-center px-4">
         <h1 class="text-5xl md:text-6xl font-extrabold text-[#FF8C00] drop-shadow-sm">어사문</h1>
         <p class="mt-2 text-lg md:text-xl text-gray-600">어휘가 사고력과 문해력을 키운다</p>
     </header>
 
-    <main class="container mx-auto px-4 flex flex-col items-center justify-center flex-grow">
-        <!-- 버튼들을 두 줄로 나누어 배치 -->
-        <div class="w-full flex flex-col items-center gap-y-4">
-            <!-- 첫 번째 줄 -->
+    <main class="container mx-auto px-4">
+        <!-- 버튼 행 사이의 간격(gap)을 줄임 -->
+        <div class="w-full flex flex-col items-center gap-y-2">
+            <!-- 첫 번째 행 -->
             <div class="flex justify-center gap-x-4 w-full">
                 <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
                     <span class="button-icon">🔢</span>
@@ -118,7 +119,7 @@
                     <span class="button-text mt-1 font-semibold text-gray-800">어휘</span>
                 </a>
             </div>
-            <!-- 두 번째 줄 -->
+            <!-- 두 번째 행 -->
             <div class="flex justify-center gap-x-4 w-full">
                 <a href="search.html" class="circle-button bg-[#FF8C00] text-white" title="검색하기">
                     <span class="button-icon">🔍</span>
@@ -132,27 +133,29 @@
         </div>
     </main>
 
-    <footer id="footer-promo-container" class="my-5 flex justify-center items-center px-4">
-        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6">
+    <!-- 푸터와 저작권 문구를 하나로 합치고, 상하 여백을 조절 -->
+    <footer class="w-full px-4 pb-4">
+        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg mx-auto bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-4">
             <div class="text-center text-gray-800 font-semibold">
                 <p class="text-base">👑 왕관유자샘의 어휘력 시리즈 🍊</p>
-                <p class="mt-2 text-base">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+                <p class="mt-1 text-sm">💡 어•사•문 교재와 함께 공부해요. 💡</p>
             </div>
-            <div class="mt-4 flex flex-row gap-4">
+            <div class="mt-3 flex flex-row gap-4">
                 <a href="#" id="buy-book-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                     <svg class="w-5 h-5 mr-2 text-amber-600"><use href="#icon-book"></use></svg>
-                    <span class="font-semibold text-gray-700">도서 구입</span>
+                    <span class="font-semibold text-gray-700 text-sm">도서 구입</span>
                 </a>
                 <a href="#" id="download-app-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                     <svg class="w-5 h-5 mr-2 text-sky-600"><use href="#icon-download"></use></svg>
-                    <span class="font-semibold text-gray-700">앱 설치</span>
+                    <span class="font-semibold text-gray-700 text-sm">앱 설치</span>
                 </a>
             </div>
         </div>
+        <div class="text-center text-xs text-gray-500 pt-3">
+            <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
+        </div>
     </footer>
-    <div class="text-center text-xs text-gray-500 pb-4">
-        <p>&copy; 2025 왕관유자샘(홍영도). 상업적 이용, 무단 수정 및 배포 금지.</p>
-    </div>
+
 
     <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
 
