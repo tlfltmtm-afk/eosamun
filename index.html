@@ -13,12 +13,20 @@
             font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             background-color: #FFFDE7;
             color: #333333;
+            /* 높이가 화면을 꽉 채우도록 설정하여 콘텐츠가 중앙에 오도록 합니다. */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        main { padding-top: 4rem; padding-bottom: 4rem; }
+        main { 
+            /* 섹션 간의 공간을 줄이기 위해 padding 값 수정 */
+            padding-top: 1.5rem; 
+            padding-bottom: 1.5rem; 
+        }
         .circle-button {
             display: flex;
             flex-direction: column;
-            /* Mobile-first: smaller size for small screens */
+            /* 버튼 크기를 원래대로 복구 */
             height: 120px;
             width: 120px;
             align-items: center;
@@ -27,15 +35,16 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             text-decoration: none;
-            flex-shrink: 0; /* Prevent buttons from shrinking to force wrapping */
+            flex-shrink: 0; 
         }
-        /* Larger size for medium screens (desktop) and up */
+        /* 데스크탑 화면에서 버튼 크기 조정 */
         @media (min-width: 768px) {
             .circle-button {
                 height: 135px;
                 width: 135px;
             }
         }
+        
         .circle-button:hover {
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -67,14 +76,18 @@
       </defs>
     </svg>
 
-    <header class="text-center pt-16 pb-8">
+    <!-- 헤더의 상하 여백(padding)을 줄임 -->
+    <header class="text-center pt-8 pb-4">
         <h1 class="text-5xl md:text-6xl font-extrabold text-[#FF8C00] drop-shadow-sm">어사문</h1>
         <p class="mt-2 text-lg md:text-xl text-gray-600">어휘가 사고력과 문해력을 키운다</p>
     </header>
 
-    <main class="container mx-auto px-4 flex flex-col items-center flex-grow">
+    <!-- flex-grow를 사용하여 main 영역이 남은 공간을 채우도록 함 -->
+    <main class="container mx-auto px-4 flex flex-col items-center justify-center flex-grow">
+        <!-- 버튼들을 한 행에 배치하고, 공간이 부족하면 줄바꿈(flex-wrap)되도록 설정 -->
         <div class="flex flex-wrap justify-center gap-4 md:gap-8">
             <a href="serial-order.html" class="circle-button bg-white" title="연번 순서">
+                <!-- 아이콘과 텍스트 크기를 원래대로 복구 -->
                 <span class="text-5xl">🔢</span>
                 <span class="mt-1 text-lg font-semibold text-gray-800">연번</span>
             </a>
@@ -97,20 +110,24 @@
         </div>
     </main>
 
-    <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
-        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
+    <!-- 푸터의 상하 여백(margin)을 줄임 -->
+    <footer id="footer-promo-container" class="my-5 flex justify-center items-center px-4">
+        <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6">
             <div class="text-center text-gray-800 font-semibold">
-                <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
-                <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+                <p class="text-base">👑 왕관유자샘의 어휘력 시리즈 🍊</p>
+                <p class="mt-2 text-base">💡 어•사•문 교재와 함께 공부해요. 💡</p>
             </div>
-            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
-                    <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
-                    <span class="font-semibold text-gray-700">교재 구입하기</span>
+            <!-- 버튼들을 한 행에 나란히 배치하기 위해 flex 사용 -->
+            <div class="mt-4 flex flex-row gap-4">
+                <a href="#" id="buy-book-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-5 h-5 mr-2 text-amber-600"><use href="#icon-book"></use></svg>
+                    <!-- 버튼 텍스트 수정 -->
+                    <span class="font-semibold text-gray-700">도서 구입</span>
                 </a>
-                <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
-                    <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
-                    <span class="font-semibold text-gray-700">앱 다운로드</span>
+                <a href="#" id="download-app-link" class="footer-link flex-1 flex items-center justify-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <svg class="w-5 h-5 mr-2 text-sky-600"><use href="#icon-download"></use></svg>
+                    <!-- 버튼 텍스트 수정 -->
+                    <span class="font-semibold text-gray-700">앱 설치</span>
                 </a>
             </div>
         </div>
@@ -147,3 +164,4 @@
     </script>
 </body>
 </html>
+

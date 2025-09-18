@@ -308,7 +308,7 @@
         document.getElementById('overview-serial').textContent = data.serial;
         document.getElementById('overview-textbook').textContent = data.textbook || '없음';
         document.getElementById('explanation-title').innerHTML = `${data.huneum} (<strong class="font-bold">${data.hanja}</strong>)`;
-        document.getElementById('explanation-text').textContent = data.explanation;
+        document.getElementById('explanation-text').innerHTML = data.explanation.replace(/(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|'[^']+')/g, '<strong class="font-bold text-[#4CAF50]">$1</strong>');
         
         const advancedVocabSection = document.getElementById('advanced-vocab');
         if (!data.advancedVocabulary || data.advancedVocabulary.length === 0) {
@@ -428,8 +428,8 @@
         document.querySelectorAll('.vocab-link').forEach(link => link.className += ' ' + getBadgeColorClasses(link.dataset.volume));
 
         document.addEventListener('keydown', handleShortcuts);
-        // 스크롤 이벤트 리스너를 다시 추가합니다.
         window.addEventListener('scroll', handleHeaderScroll, { passive: true });
+        window.addEventListener('scroll', closeAllPopups, { passive: true });
         
         document.querySelectorAll('.modal-popup').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -444,10 +444,11 @@
     
     const syllableModal = document.getElementById('syllable-modal');
     function handleSyllableAnalysis(e, allHanjaData) {
-        e.stopPropagation();
-        closeAllPopups();
         const card = e.currentTarget.closest('.kpi-card');
         const title = card.dataset.title;
+        e.stopPropagation();
+        closeAllPopups();
+        
         const match = title.match(/([^\(]+)\(([^\)]+)\)/);
         if (!match) return;
 
@@ -467,10 +468,10 @@
     
     const actionsModal = document.getElementById('actions-modal');
     function handleActionsPopup(e) {
-        e.stopPropagation();
-        closeAllPopups();
         const card = e.currentTarget.closest('.kpi-card');
         const title = card.dataset.title;
+        e.stopPropagation();
+        closeAllPopups();
         if (!title) return;
 
         const actionsContent = actionsModal.querySelector('.actions-popup-content');
@@ -635,3 +636,5 @@
     </script>
 </body>
 </html>
+
+

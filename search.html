@@ -52,11 +52,9 @@
         .toast-notification.show {
             opacity: 1;
         }
-        /* Active Nav Link Style */
         .nav-link.active {
             background-color: #FBBF24; /* amber-400 */
         }
-        /* Tooltip styles */
         .tooltip-container {
             position: relative;
         }
@@ -83,8 +81,6 @@
             opacity: 1;
             visibility: visible;
         }
-
-        /* Footer Styles */
         .interactive-box {
             transition: all 0.2s ease-in-out;
             cursor: pointer;
@@ -129,18 +125,23 @@
                 궁금한 어휘(한자, 단어 등)를 검색해 보세요.
             </div>
             <div id="results-container" class="space-y-3">
+                <!-- 검색 결과가 여기에 표시됩니다. -->
+            </div>
+            
+            <!-- 외부 검색 링크 섹션 -->
+            <div id="external-search-section" class="hidden mt-8 text-center pt-6 border-t-2 border-amber-200">
+                <p class="text-gray-600 mb-4">검색 단어 그대로, 외부 사전에서 검색해 보세요.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <a id="external-ai-link" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800">🤖 AI 챗봇</span>
+                    </a>
+                    <a id="external-korean-link" href="#" target="_blank" class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800">📖 국어사전</span>
+                    </a>
+                    <a id="external-hanja-link" href="#" target="_blank" class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800">📖 한자사전</span>
+                    </a>
                 </div>
-        </section>
-
-        <section id="no-results-section" class="hidden mt-8 text-center">
-             <p id="no-results-message" class="text-gray-800 font-semibold text-lg mb-6"></p>
-            <div class="space-y-4">
-                <a id="ai-chatbot-link" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    </a>
-                <a id="korean-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    </a>
-                <a id="hanja-dictionary-link" href="#" target="_blank" class="block p-4 bg-yellow-100 border border-yellow-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-center min-h-[72px]">
-                    </a>
             </div>
         </section>
 
@@ -203,11 +204,10 @@
             const searchInput = document.getElementById('search-input');
             const resultsContainer = document.getElementById('results-container');
             const guidanceText = document.getElementById('guidance-text');
-            const noResultsSection = document.getElementById('no-results-section');
-            const noResultsMessage = document.getElementById('no-results-message');
-            const aiChatbotLink = document.getElementById('ai-chatbot-link');
-            const koreanDictionaryLink = document.getElementById('korean-dictionary-link');
-            const hanjaDictionaryLink = document.getElementById('hanja-dictionary-link');
+            const externalSearchSection = document.getElementById('external-search-section');
+            const externalAiLink = document.getElementById('external-ai-link');
+            const externalKoreanLink = document.getElementById('external-korean-link');
+            const externalHanjaLink = document.getElementById('external-hanja-link');
             let searchData = [];
 
             function debounce(func, delay) {
@@ -238,42 +238,40 @@
 
             const performSearch = (query) => {
                 const trimmedQuery = query.trim();
-                if (trimmedQuery.length < 1) {
-                    displayResults([], trimmedQuery);
-                    return;
-                }
 
                 const lowerCaseQuery = trimmedQuery.toLowerCase();
                 const results = new Map();
 
-                searchData.forEach(item => {
-                    let matchReason = '';
-                    if (item.huneum && item.huneum.toLowerCase().includes(lowerCaseQuery)) {
-                        matchReason = `훈음 '<span class="highlight">${item.huneum}</span>'에서 발견됨`;
-                    } else {
-                        const vocabMatch = (item.vocabulary || []).find(v => v.title && v.title.toLowerCase().includes(lowerCaseQuery));
-                        if (vocabMatch) {
-                            matchReason = `학습 어휘 '<span class="highlight">${vocabMatch.title.split('(')[0]}</span>'에서 발견됨`;
+                if (trimmedQuery.length > 0) {
+                    searchData.forEach(item => {
+                        let matchReason = '';
+                        if (item.huneum && item.huneum.toLowerCase().includes(lowerCaseQuery)) {
+                            matchReason = `훈음 '<span class="highlight">${item.huneum}</span>'에서 발견됨`;
                         } else {
-                            const advVocabMatch = (item.advancedVocabulary || []).find(av => av.word && av.word.toLowerCase().includes(lowerCaseQuery));
-                            if (advVocabMatch) {
-                                matchReason = `도약 어휘 '<span class="highlight">${advVocabMatch.word.split('(')[0]}</span>'에서 발견됨`;
+                            const vocabMatch = (item.vocabulary || []).find(v => v.title && v.title.toLowerCase().includes(lowerCaseQuery));
+                            if (vocabMatch) {
+                                matchReason = `학습 어휘 '<span class="highlight">${vocabMatch.title.split('(')[0]}</span>'에서 발견됨`;
+                            } else {
+                                const advVocabMatch = (item.advancedVocabulary || []).find(av => av.word && av.word.toLowerCase().includes(lowerCaseQuery));
+                                if (advVocabMatch) {
+                                    matchReason = `도약 어휘 '<span class="highlight">${advVocabMatch.word.split('(')[0]}</span>'에서 발견됨`;
+                                }
                             }
                         }
-                    }
-                    
-                    if (matchReason && !results.has(item.id)) {
-                        results.set(item.id, { ...item, matchReason });
-                    }
-                });
-
+                        
+                        if (matchReason && !results.has(item.id)) {
+                            results.set(item.id, { ...item, matchReason });
+                        }
+                    });
+                }
+                
                 displayResults(Array.from(results.values()), trimmedQuery);
             };
 
             const displayResults = (results, query) => {
                 resultsContainer.innerHTML = '';
                 guidanceText.classList.add('hidden');
-                noResultsSection.classList.add('hidden');
+                externalSearchSection.classList.add('hidden');
 
                 if (query === '') {
                     guidanceText.textContent = '궁금한 어휘를 검색해 보세요.';
@@ -281,47 +279,15 @@
                     return;
                 }
                 
+                // 검색어가 있으면 항상 외부 링크 섹션을 표시하고 링크를 업데이트합니다.
+                externalSearchSection.classList.remove('hidden');
+                externalKoreanLink.href = `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(query)}`;
+                externalHanjaLink.href = `https://hanja.dict.naver.com/search?query=${encodeURIComponent(query)}`;
+                externalAiLink.dataset.query = query;
+
                 if (results.length === 0) {
-                    noResultsMessage.textContent = '어사문에는 없는 단어입니다.';
-                    
-                    const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 inline-block ml-1"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" /></svg>`;
-
-                    aiChatbotLink.innerHTML = `
-                        <div class="text-center">
-                            <p class="font-semibold text-lg flex items-center justify-center">
-                                <span class="text-blue-600">AI 챗봇에서 </span>
-                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
-                                <span class="text-blue-600"> 학습하기</span>
-                                ${arrowIcon}
-                            </p>
-                            <p class="text-sm text-gray-500 mt-1">검색어가 자동 복사됩니다. 챗봇에 붙여 넣으세요.</p>
-                        </div>`;
-                    
-                    koreanDictionaryLink.innerHTML = `
-                        <div class="text-center">
-                            <p class="font-semibold text-lg flex items-center justify-center">
-                                <span class="text-blue-600">국어사전에서 </span>
-                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
-                                <span class="text-blue-600"> 검색하기</span>
-                                ${arrowIcon}
-                            </p>
-                        </div>`;
-                    
-                    hanjaDictionaryLink.innerHTML = `
-                        <div class="text-center">
-                            <p class="font-semibold text-lg flex items-center justify-center">
-                                <span class="text-blue-600">한자사전에서 </span>
-                                <span class="font-bold text-amber-500 mx-1">'${query}'</span>
-                                <span class="text-blue-600"> 검색하기</span>
-                                ${arrowIcon}
-                            </p>
-                        </div>`;
-
-                    koreanDictionaryLink.href = `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(query)}`;
-                    hanjaDictionaryLink.href = `https://hanja.dict.naver.com/search?query=${encodeURIComponent(query)}`;
-                    aiChatbotLink.dataset.query = query;
-                    noResultsSection.classList.remove('hidden');
-
+                    guidanceText.innerHTML = `<span class="font-bold text-amber-600">'${query}'</span>에 대한 검색 결과가 없습니다.`;
+                    guidanceText.classList.remove('hidden');
                 } else {
                     guidanceText.innerHTML = `총 <span class="font-bold text-amber-600">${results.length}개</span>의 결과를 찾았습니다.`;
                     guidanceText.classList.remove('hidden');
@@ -355,7 +321,6 @@
                     searchInput.disabled = false;
                     searchInput.focus();
                     
-                    // URL에서 검색어를 읽어와서 바로 검색을 실행합니다.
                     const urlParams = new URLSearchParams(window.location.search);
                     const queryFromUrl = urlParams.get('q');
                     
@@ -377,7 +342,7 @@
             searchInput.addEventListener('input', () => debouncedSearch(searchInput.value));
             searchInput.disabled = true;
             
-            aiChatbotLink.addEventListener('click', (e) => {
+            externalAiLink.addEventListener('click', (e) => {
                 const query = e.currentTarget.dataset.query;
                 if (!query) return;
 
