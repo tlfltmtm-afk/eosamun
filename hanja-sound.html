@@ -9,15 +9,11 @@
     <meta name="theme-color" content="#FFD700">
     <style>
         html { scroll-behavior: smooth; }
-
-        /* --- 통합 헤더 스타일 --- */
         body {
             font-family: "Paperlogy", sans-serif;
             background-color: #fefce8; /* amber-50 */
             transition: padding-top 0.3s ease; /* 부드러운 전환 효과 */
         }
-
-        /* 1. 메인 메뉴 상단바 */
         .header-fixed {
             position: fixed;
             top: 0;
@@ -31,8 +27,6 @@
             background-color: #FBBF24;
             font-weight: 700;
         }
-
-        /* 2. 필터 메뉴 컨테이너 (2, 3차 메뉴 래퍼) */
         .filter-container-fixed {
             position: fixed;
             top: 56px; /* 1차 상단바 바로 아래 */
@@ -45,8 +39,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.3s ease-out;
         }
-
-        /* 3. 필터 버튼 (공통) */
         .filter-nav {
             display: flex;
             align-items: center;
@@ -80,15 +72,10 @@
             background-color: #F97316; /* orange-500 */
             border-color: #F97316;
         }
-
-        /* 4. 기타 유틸리티 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hidden { display: none; }
-        
         h3[id] { transition: scroll-margin-top 0.3s ease-in-out; }
-
-        /* 툴팁 스타일 */
         .tooltip-container { position: relative; }
         .tooltip-container::after {
             content: attr(data-tooltip);
@@ -110,11 +97,9 @@
             pointer-events: none;
         }
         .tooltip-container:hover::after { opacity: 1; visibility: visible; }
-        
-        /* 리스트 아이템 스타일 */
         .index-list { display: flex; flex-direction: column; gap: 0.5rem; }
         .hanja-item-box {
-            display: flex; align-items: center; padding: 0.75rem 1rem; /* 좌우 패딩을 살짝 줄입니다 */
+            display: flex; align-items: center; padding: 0.75rem 1rem;
             background-color: white; border-radius: 0.5rem; border: 1px solid #E5E7EB;
             text-decoration: none; color: inherit; transition: all 0.2s ease-in-out;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -124,8 +109,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
         .hanja-item-box:active { transform: scale(0.98); background-color: #FDE68A; }
-        
-        /* [개선] sound-box 스타일 수정 */
         .sound-box {
             display: inline-flex;
             align-items: center;
@@ -134,14 +117,12 @@
             color: white;
             font-weight: bold;
             border-radius: 0.375rem;
-            padding: 0.4rem 0.6rem; /* 패딩 조정 */
-            min-height: 32px; /* 고정 height 대신 min-height 사용 */
-            font-size: 0.95rem; /* 폰트 크기 미세 조정 */
+            padding: 0.4rem 0.6rem;
+            min-height: 32px;
+            font-size: 0.95rem;
             text-align: center;
-            flex-shrink: 0; /* 공간이 부족할 때 줄어들지 않도록 설정 */
+            flex-shrink: 0;
         }
-
-        /* 검색 팝업 관련 스타일 */
         .search-modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.6); z-index: 40;
@@ -149,6 +130,9 @@
         .search-modal {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 50;
+        }
+        #toast-notification.show {
+            opacity: 1;
         }
     </style>
 </head>
@@ -207,25 +191,50 @@
                     <span class="sr-only">Search</span>
                 </button>
             </form>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex justify-center items-stretch gap-2">
+                    <a id="chatbot-search-btn" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">🤖 챗봇검색</span>
+                    </a>
+                    <a id="korean-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 국어사전</span>
+                    </a>
+                    <a id="hanja-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 한자사전</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div id="toast-notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-lg z-50 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const contentContainer = document.getElementById('content-container');
         const loadingEl = document.getElementById('loading');
         const secondaryFilter = document.getElementById('secondary-filter');
-        
-        // --- 모든 페이지 공통 레이아웃 관리 스크립트 ---
         const mainHeader = document.querySelector('.header-fixed');
         const filterContainer = document.getElementById('filter-container');
         const body = document.body;
+
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
 
         function updateBodyPadding() {
             setTimeout(() => {
                 if (mainHeader && filterContainer) {
                     const totalHeight = mainHeader.offsetHeight + filterContainer.offsetHeight;
                     body.style.paddingTop = `${totalHeight + 16}px`;
-                    
                     document.querySelectorAll('h3[id]').forEach(h3 => {
                         h3.style.scrollMarginTop = `${totalHeight + 16}px`;
                     });
@@ -246,7 +255,6 @@
                 const response = await fetch('./data/search_index.json');
                 if (!response.ok) throw new Error('Failed to load index file.');
                 const data = await response.json();
-
                 const groupedByConsonant = data.reduce((acc, item) => {
                     const sounds = item.sound.split(/[,/ ]+/);
                     sounds.forEach(sound => {
@@ -258,20 +266,15 @@
                     });
                     return acc;
                 }, {});
-                
                 const sortedConsonants = Object.keys(groupedByConsonant).sort((a, b) => a.localeCompare(b, 'ko-KR'));
-
                 let htmlContent = '<h2 class="text-2xl sm:text-3xl font-bold mb-6 text-[#FF8C00] border-b-2 border-amber-300 pb-3">ㄱ-ㅎ 한자음 순서</h2>';
                 sortedConsonants.forEach(consonant => {
                     htmlContent += `<h3 id="hanja-${consonant}" class="text-xl font-semibold mt-8 mb-4 text-amber-800">${consonant}</h3>`;
                     htmlContent += '<div class="index-list">';
-                    
                     const uniqueItems = Array.from(new Map(groupedByConsonant[consonant].map(item => [item.id, item])).values());
                     const sortedItems = uniqueItems.sort((a, b) => a.sound.localeCompare(b.sound, 'ko-KR'));
-                    
                     sortedItems.forEach(item => {
                         const idFormatted = `[${item.id.replace('-', '권_')}]`;
-                        // [수정] 레이아웃 변경: 상단(음, 훈음), 하단(번호) 분리
                         htmlContent += `
                             <a href="hanja-detail.html?id=${item.id}" class="hanja-item-box text-lg">
                                 <div class="w-full flex flex-col">
@@ -281,17 +284,13 @@
                                     </div>
                                     <p class="mt-2 font-semibold text-red-600 text-sm text-right">${idFormatted}</p>
                                 </div>
-                            </a>
-                        `;
+                            </a>`;
                     });
                     htmlContent += '</div>';
                 });
-                
                 contentContainer.innerHTML = htmlContent;
                 loadingEl.classList.add('hidden');
-                
                 setupNavigation(sortedConsonants);
-
             } catch (error) {
                 loadingEl.textContent = '목차를 불러오는 데 실패했습니다.';
                 console.error(error);
@@ -300,25 +299,18 @@
 
         const setupNavigation = (consonants) => {
             const h3Elements = document.querySelectorAll('h3[id]');
-            
-            secondaryFilter.innerHTML = consonants.map(c => 
-                `<a href="#hanja-${c}" class="filter-button">${c}</a>`
-            ).join('');
-            
-            updateBodyPadding(); // 필터 생성 후 padding 업데이트
-
+            secondaryFilter.innerHTML = consonants.map(c => `<a href="#hanja-${c}" class="filter-button">${c}</a>`).join('');
+            updateBodyPadding();
             secondaryFilter.addEventListener('click', (e) => {
                 const button = e.target.closest('a.filter-button');
                 if (!button) return;
                 e.preventDefault();
-                
                 const targetId = button.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
-
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -328,20 +320,46 @@
                         if (activeLink) activeLink.classList.add('active');
                     }
                 });
-            }, { rootMargin: `-120px 0px -60% 0px` }); // 헤더 높이를 고려하여 rootMargin 조정
-
+            }, { rootMargin: `-120px 0px -60% 0px` });
             h3Elements.forEach(h3 => observer.observe(h3));
         };
         
-        // 검색 팝업 관련 스크립트
+        // --- 검색 팝업 관련 스크립트 ---
         const searchFab = document.getElementById('search-fab');
         const searchModalOverlay = document.getElementById('search-modal-overlay');
         const searchModal = document.getElementById('search-modal');
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
+        const koreanDictBtn = document.getElementById('korean-dict-btn');
+        const hanjaDictBtn = document.getElementById('hanja-dict-btn');
+        const chatbotSearchBtn = document.getElementById('chatbot-search-btn');
 
-        function openModal() { searchModalOverlay.classList.remove('hidden'); searchModal.classList.remove('hidden'); searchInput.focus(); }
-        function closeModal() { searchModalOverlay.classList.add('hidden'); searchModal.classList.add('hidden'); }
+        // --- [추가할 코드] Ctrl+F 단축키로 검색창 열기 ---
+window.addEventListener('keydown', (e) => {
+    // Ctrl 키(Windows) 또는 Command 키(Mac)가 'f'키와 함께 눌렸는지 확인합니다.
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        // 브라우저의 기본 '찾기' 기능을 막습니다.
+        e.preventDefault();
+        
+        // 우리가 만든 검색 팝업창을 여는 함수를 호출합니다.
+        openModal();
+    }
+});
+
+        const closeModalOnScroll = () => closeModal();
+
+        function openModal() {
+            searchModalOverlay.classList.remove('hidden');
+            searchModal.classList.remove('hidden');
+            searchInput.focus();
+            window.addEventListener('scroll', closeModalOnScroll);
+        }
+
+        function closeModal() {
+            window.removeEventListener('scroll', closeModalOnScroll);
+            searchModalOverlay.classList.add('hidden');
+            searchModal.classList.add('hidden');
+        }
 
         searchFab.addEventListener('click', openModal);
         searchModalOverlay.addEventListener('click', closeModal);
@@ -349,9 +367,37 @@
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const searchTerm = searchInput.value.trim();
+            window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+        });
+        
+        koreanDictBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            const url = searchTerm ? `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(searchTerm)}` : 'https://ko.dict.naver.com/';
+            window.open(url, '_blank');
+        });
+
+        hanjaDictBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            const url = searchTerm ? `https://hanja.naver.com/search?query=${encodeURIComponent(searchTerm)}` : 'https://hanja.naver.com/';
+            window.open(url, '_blank');
+        });
+
+        chatbotSearchBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            const chatbotUrl = e.currentTarget.href;
             if (searchTerm) {
-                window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+                try {
+                    await navigator.clipboard.writeText(searchTerm);
+                    showToast('검색어가 클립보드에 복사되었습니다.');
+                } catch (err) {
+                    console.error('클립보드 복사 실패:', err);
+                    showToast('클립보드 복사에 실패했습니다.');
+                }
             }
+            window.open(chatbotUrl, '_blank');
         });
         
         renderContent();
@@ -360,4 +406,3 @@
     </script>
 </body>
 </html>
-

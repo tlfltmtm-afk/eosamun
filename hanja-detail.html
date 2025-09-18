@@ -12,7 +12,6 @@
         body {
             font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI",Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             background-color: #FFFDE7; color: #333333;
-            /* 상단바가 fixed이므로 콘텐츠가 가려지지 않게 body에 padding을 다시 추가합니다. */
             padding-top: calc(var(--topbar-height) + 20px); 
         }
         ::-webkit-scrollbar { width: 12px; }
@@ -44,14 +43,12 @@
             border-color: #FF8C00;
         }
         
-        /* 키보드 모드일 때 특정 요소들의 호버 효과 비활성화 (포커스 상태가 아닐 때만) */
         body.using-keyboard .kpi-card:hover:not(:focus) {
             transform: none;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             border-color: transparent;
         }
 
-        /* 일반적인 버튼과 링크의 호버 배경색 제거 (포커스 상태가 아닐 때만) */
         body.using-keyboard a:hover:not(:focus),
         body.using-keyboard button:hover:not(:focus) {
             background-color: transparent;
@@ -71,22 +68,21 @@
         }
         #toast-notification.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
         
-        /* 중앙 팝업 모달 스타일 */
         .modal-popup {
             position: fixed; inset: 0; z-index: 50;
             display: flex; align-items: center; justify-content: center;
             padding: 1rem;
-            background-color: transparent; /* 배경 투명 */
-            pointer-events: none; /* 닫혔을 때 뒷배경 클릭 허용 */
+            background-color: transparent;
+            pointer-events: none;
             opacity: 0; visibility: hidden;
             transition: opacity 0.2s ease, visibility 0.2s;
         }
         .modal-popup.open { 
             opacity: 1; visibility: visible; 
-            pointer-events: auto; /* 열렸을 때 자신과 자식 요소만 클릭 가능 */
+            pointer-events: auto;
         }
         .modal-popup-content {
-            background-color: #FFFBEB; /* 연한 주황색 배경 */
+            background-color: #FFFBEB;
             border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             padding: 1.5rem;
@@ -96,7 +92,6 @@
         .modal-popup.open .modal-popup-content { transform: scale(1); opacity: 1; }
         .actions-popup-content button { border: 1px solid #e2e8f0; }
         
-        /* 음절 분석 팝업 스타일 */
         .syllable-display { gap: 1rem; }
         .syllable-char-box {
             position: relative; padding: 1rem; border-radius: 0.5rem;
@@ -111,7 +106,6 @@
             position: absolute; right: 0.5rem; bottom: 0.5rem;
         }
 
-        /* 오디오 플로팅 버튼 */
         #audio-controls { transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
         #audio-controls.hidden { opacity: 0; visibility: hidden; transform: translateY(10px); }
         #audio-controls button {
@@ -129,6 +123,30 @@
         #audio-controls button.active {
             box-shadow: 0 0 0 3px #F97316;
             background-color: rgba(251, 146, 60, 0.2);
+        }
+
+        /* --- [추가된 CSS] 검색 팝업창 스타일 --- */
+        .search-modal-overlay {
+            position: fixed; inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 60; /* 다른 팝업보다 위에 표시 */
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .search-modal-overlay.open {
+            opacity: 1; visibility: visible;
+        }
+        .search-modal {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            z-index: 70; /* 오버레이보다 위에 표시 */
+            width: 100%; max-width: 24rem; /* sm 사이즈 */
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .search-modal.open {
+            opacity: 1; visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
         }
     </style>
 </head>
@@ -160,7 +178,7 @@
             <div class="flex justify-center items-center h-full px-4 max-w-5xl mx-auto">
                 <div class="flex items-center space-x-6">
                     <a href="index.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="홈"><svg class="w-7 h-7 text-amber-900"><use href="#icon-home"></use></svg></a>
-                    <a href="search.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="검색하기"><svg class="w-7 h-7 text-amber-900"><use href="#icon-search"></use></svg></a>
+                    <a href="search.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="검색하기 (Ctrl+F)"><svg class="w-7 h-7 text-amber-900"><use href="#icon-search"></use></svg></a>
                     <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" title="왕관유자봇" class="p-2 rounded-full hover:bg-black/10 transition-colors"><svg class="w-7 h-7 text-amber-900"><use href="#icon-ai-text"></use></svg></a>
                     <a id="youtube-search-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="YouTube에서 검색">
                         <svg class="w-7 h-7 text-amber-900"><use href="#icon-youtube"></use></svg>
@@ -236,8 +254,8 @@
         <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
             <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
                 <div class="text-center text-gray-800 font-semibold">
-                       <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
-                       <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+                        <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
+                        <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
                 </div>
                 <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
@@ -272,9 +290,113 @@
     <div id="audio-controls" class="hidden fixed bottom-5 right-5 z-40 flex">
         <button id="audio-play-pause-btn"><svg class="w-4 h-4"><use href="#icon-play"></use></svg></button>
     </div>
+    
+    <div id="search-modal-overlay" class="search-modal-overlay"></div>
+    <div id="search-modal" class="search-modal">
+        <div class="bg-white rounded-lg shadow-xl p-6 relative">
+            <form id="search-form" class="flex items-center space-x-2">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" id="search-input" class="w-full pl-10 pr-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none" placeholder="검색어 입력">
+                </div>
+                <button type="submit" class="p-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex-shrink-0" aria-label="검색 실행">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </form>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex justify-center items-stretch gap-2">
+                    <a id="chatbot-search-btn" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">🤖 챗봇검색</span>
+                    </a>
+                    <a id="korean-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 국어사전</span>
+                    </a>
+                    <a id="hanja-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 한자사전</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
+        
+        // --- [추가된 스크립트] 단축키 검색 팝업창 로직 ---
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModal = document.getElementById('search-modal');
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const chatbotSearchBtn = document.getElementById('chatbot-search-btn');
+        const koreanDictBtn = document.getElementById('korean-dict-btn');
+        const hanjaDictBtn = document.getElementById('hanja-dict-btn');
+        
+        const closeModalOnScroll = () => closeModal();
+
+        function openModal() {
+            if (searchModal.classList.contains('open')) return;
+            searchModalOverlay.classList.add('open');
+            searchModal.classList.add('open');
+            searchInput.focus();
+            window.addEventListener('scroll', closeModalOnScroll, { once: true });
+        }
+
+        function closeModal() {
+            searchModalOverlay.classList.remove('open');
+            searchModal.classList.remove('open');
+            window.removeEventListener('scroll', closeModalOnScroll);
+        }
+
+        searchModalOverlay.addEventListener('click', closeModal);
+        
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+        });
+
+        chatbotSearchBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                try {
+                    await navigator.clipboard.writeText(searchTerm);
+                    showToast('검색어가 클립보드에 복사되었습니다.');
+                } catch (err) {
+                    showToast('클립보드 복사에 실패했습니다.', 'error');
+                }
+            }
+            window.open(e.currentTarget.href, '_blank');
+        });
+
+        koreanDictBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            const url = searchTerm ? `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(searchTerm)}` : 'https://ko.dict.naver.com/';
+            window.open(url, '_blank');
+        });
+
+        hanjaDictBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            const url = searchTerm ? `https://hanja.naver.com/search?query=${encodeURIComponent(searchTerm)}` : 'https://hanja.naver.com/';
+            window.open(url, '_blank');
+        });
+
+        // 메인 단축키 리스너
+        document.addEventListener('keydown', (e) => {
+             // 검색 단축키 (Ctrl+F)
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                openModal();
+            }
+            // 기존 단축키 핸들러 호출
+            handleShortcuts(e);
+        });
+        // --- [추가된 스크립트 끝] ---
+
         try {
             const params = new URLSearchParams(window.location.search);
             const hanjaId = params.get('id');
@@ -427,7 +549,6 @@
         const getBadgeColorClasses = (v) => ['','bg-red-200 text-red-800 hover:bg-red-300','bg-blue-200 text-blue-800 hover:bg-blue-300','bg-green-200 text-green-800 hover:bg-green-300','bg-yellow-200 text-yellow-800 hover:bg-yellow-300','bg-indigo-200 text-indigo-800 hover:bg-indigo-300','bg-purple-200 text-purple-800 hover:bg-purple-300','bg-pink-200 text-pink-800 hover:bg-pink-300','bg-teal-200 text-teal-800 hover:bg-teal-300','bg-slate-300 text-slate-800 hover:bg-slate-400','bg-orange-300 text-orange-800 hover:bg-orange-400'][parseInt(v, 10)] || '';
         document.querySelectorAll('.vocab-link').forEach(link => link.className += ' ' + getBadgeColorClasses(link.dataset.volume));
 
-        document.addEventListener('keydown', handleShortcuts);
         window.addEventListener('scroll', handleHeaderScroll, { passive: true });
         window.addEventListener('scroll', closeAllPopups, { passive: true });
         
@@ -503,19 +624,14 @@
         playPauseBtn.classList.toggle('active', isPlaying);
     }
 
-    // --- Other Handlers ---
-    // 스크롤 핸들러 함수를 요청하신 기능에 맞게 수정합니다.
     function handleHeaderScroll() {
         const topbar = document.getElementById('topbar');
         const currentScrollY = window.scrollY;
         
         if (topbar) {
-            // 스크롤 위치가 10px보다 크면 (즉, 최상단이 아니면) 상단바를 숨깁니다.
             if (currentScrollY > 10) {
                 topbar.style.transform = 'translateY(-100%)';
-            } 
-            // 스크롤 위치가 최상단이면 상단바를 보여줍니다.
-            else {
+            } else {
                 topbar.style.transform = 'translateY(0%)';
             }
         }
@@ -562,6 +678,12 @@
     }
 
     function handleShortcuts(e) {
+        // 이 함수는 이제 document의 keydown 이벤트 리스너에 의해 호출됩니다.
+        // Ctrl+F는 이미 상위 리스너에서 처리했으므로 여기서는 나머지 단축키만 신경 씁니다.
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+            return; // 이미 처리되었으므로 함수 종료
+        }
+        
         if (firstKeydown) {
             if (!isKeyboardMode) {
                 isKeyboardMode = true;
@@ -575,9 +697,16 @@
             return;
         }
 
-        const anyPopupOpen = !!document.querySelector('.modal-popup.open');
+        const anyPopupOpen = !!document.querySelector('.modal-popup.open, .search-modal.open');
         if (anyPopupOpen) {
-            if (e.key === 'Escape') closeAllPopups();
+            if (e.key === 'Escape') {
+                closeAllPopups();
+                // 추가: 검색 팝업도 닫기
+                const searchModal = document.getElementById('search-modal');
+                if (searchModal && searchModal.classList.contains('open')) {
+                    searchModal.dispatchEvent(new Event('close')); // closeModal 함수 트리거
+                }
+            }
             return;
         }
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -636,5 +765,3 @@
     </script>
 </body>
 </html>
-
-

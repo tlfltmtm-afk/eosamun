@@ -8,14 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
     <meta name="theme-color" content="#FFD700">
     <style>
-        /* Base and Font Styles */
         body {
             font-family: "Paperlogy", sans-serif;
             background-color: #fefce8; /* bg-yellow-50 */
             transition: padding-top 0.3s ease;
         }
-
-        /* --- Header Styles --- */
         .header-fixed {
             position: fixed;
             top: 0;
@@ -25,11 +22,7 @@
             background-color: #FFD700;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .nav-link.active {
-            background-color: #FBBF24;
-        }
-        
+        .nav-link.active { background-color: #FBBF24; }
         .filter-container-fixed {
             position: fixed;
             top: 56px;
@@ -42,50 +35,36 @@
             -webkit-backdrop-filter: blur(4px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        /* --- Filter Button Styles --- */
         .filter-nav {
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
         }
-
         .primary-btn, .secondary-btn {
             scroll-snap-align: center;
             transition: all 0.2s ease-in-out;
             white-space: nowrap;
         }
-        
         .primary-btn {
             background-color: white;
             border: 1px solid #e5e7eb;
         }
-
         .primary-btn.active {
             font-weight: 700;
             color: white;
             background-color: #F97316;
             border-color: #F97316;
         }
-
-        .secondary-btn:active {
-            background-color: rgba(0,0,0,0.1);
-        }
-
+        .secondary-btn:active { background-color: rgba(0,0,0,0.1); }
         #secondary-filter-wrapper {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
         }
-        
-        .scroll-arrow {
-            transition: opacity 0.2s ease-in-out;
-        }
+        .scroll-arrow { transition: opacity 0.2s ease-in-out; }
         .scroll-arrow:disabled {
             opacity: 0;
             pointer-events: none;
         }
-
-        /* --- Tooltip Styles --- */
         .tooltip-container { position: relative; }
         .tooltip-container::after {
             content: attr(data-tooltip);
@@ -107,17 +86,11 @@
             pointer-events: none;
         }
         .tooltip-container:hover::after { opacity: 1; visibility: visible; }
-
-        /* Animation for new content */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        /* Search Modal Styles */
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         .search-modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.6); z-index: 40;
@@ -126,11 +99,12 @@
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 50;
         }
-
-        /* Utility Styles */
         .hidden { display: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        #toast-notification.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -193,8 +167,24 @@
                     <span class="sr-only">Search</span>
                 </button>
             </form>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex justify-center items-stretch gap-2">
+                    <a id="chatbot-search-btn" href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">🤖 챗봇검색</span>
+                    </a>
+                    <a id="korean-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 국어사전</span>
+                    </a>
+                    <a id="hanja-dict-btn" href="#" target="_blank" class="flex-1 flex items-center justify-center text-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                        <span class="font-semibold text-gray-800 text-sm">📖 한자사전</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
+    
+    <div id="toast-notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-lg z-50 opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingEl = document.getElementById('loading');
@@ -207,6 +197,18 @@
             const scrollRightBtn = document.getElementById('scroll-right');
             const listContainer = document.getElementById('list-container');
             const body = document.body;
+
+            let toastTimeout;
+            function showToast(message) {
+                const toast = document.getElementById('toast-notification');
+                if (!toast) return;
+                toast.textContent = message;
+                toast.classList.add('show');
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
 
             const updateBodyPadding = () => {
                 setTimeout(() => {
@@ -221,15 +223,12 @@
                 const response = await fetch('./data/hanja_db.json');
                 if (!response.ok) throw new Error('데이터 파일을 불러올 수 없습니다.');
                 const allHanjaData = await response.json();
-
                 const processedData = processAllVocab(allHanjaData);
                 const sortedConsonants = Object.keys(processedData).sort((a, b) => a.localeCompare(b, 'ko-KR'));
-                
                 loadingEl.classList.add('hidden');
                 renderPrimaryFilter(sortedConsonants);
                 attachEventListeners(processedData, sortedConsonants);
                 updateBodyPadding();
-
             } catch (error) {
                 loadingEl.innerHTML = `<p class="text-red-500">${error.message}</p>`;
             }
@@ -246,7 +245,6 @@
                         if (!vocabMap.has(word)) vocabMap.set(word, { word: av.word, linkId: av.linkId });
                     });
                 });
-
                 const getInitialSound = (char) => {
                     const consonants = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
                     const ga = 44032;
@@ -255,7 +253,6 @@
                     uni = uni - ga;
                     return consonants[Math.floor(uni / 588)] || null;
                 };
-
                 const grouped = Array.from(vocabMap.values()).reduce((acc, item) => {
                     const initial = getInitialSound(item.word[0]);
                     const firstSyllable = item.word[0];
@@ -266,7 +263,6 @@
                     }
                     return acc;
                 }, {});
-
                 for (const consonant in grouped) {
                     for (const syllable in grouped[consonant]) {
                         grouped[consonant][syllable].sort((a,b) => a.word.localeCompare(b.word, 'ko-KR'));
@@ -279,23 +275,19 @@
                 const checkScroll = () => {
                     setTimeout(() => {
                         const isScrollable = secondaryFilter.scrollWidth > secondaryFilter.clientWidth;
-                        
                         if (!isScrollable) {
                             scrollLeftBtn.classList.add('hidden');
                             scrollRightBtn.classList.add('hidden');
                             return;
                         }
-                        
                         scrollLeftBtn.classList.remove('hidden');
                         scrollRightBtn.classList.remove('hidden');
-
                         const atStart = secondaryFilter.scrollLeft < 10;
                         const atEnd = secondaryFilter.scrollLeft + secondaryFilter.clientWidth >= secondaryFilter.scrollWidth - 10;
                         scrollLeftBtn.disabled = atStart;
                         scrollRightBtn.disabled = atEnd;
                     }, 100);
                 };
-                
                 secondaryFilter.addEventListener('scroll', checkScroll);
                 window.addEventListener('resize', checkScroll);
                 checkScroll();
@@ -324,7 +316,6 @@
                  }
                 const sortedSyllables = Object.keys(data[consonant]).sort((a,b) => a.localeCompare(b, 'ko-KR'));
                 const subGroupsHtml = sortedSyllables.map(syllable => {
-                    // [수정] 어휘 목록 아이템의 HTML 구조를 2단으로 변경
                     const itemsHtml = data[consonant][syllable].map(item => {
                         const idFormatted = `[${item.linkId.replace('-', '권_')}]`;
                         return `
@@ -336,10 +327,8 @@
                                     </div>
                                     <p class="mt-2 font-semibold text-red-600 text-sm text-right">${idFormatted}</p>
                                 </div>
-                            </a>
-                        `;
+                            </a>`;
                     }).join('');
-
                     if (itemsHtml) {
                         return `
                             <div id="subgroup-${syllable}" class="pt-4">
@@ -349,21 +338,18 @@
                     }
                     return '';
                 }).join('');
-
                 const groupHtml = `
                     <div id="group-${consonant}" class="pt-4 animate-fade-in">
                         <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-md">
                              <h2 class="text-4xl font-bold mb-6 text-amber-800 pl-2">${consonant}</h2>
                              ${subGroupsHtml}
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 listContainer.innerHTML = groupHtml;
             }
 
             function attachEventListeners(data, sortedConsonants) {
                 let activePrimaryBtn = null;
-
                 const initialConsonant = sortedConsonants[0] || null;
                 if (initialConsonant) {
                     const initialButton = primaryFilter.querySelector(`[data-consonant="${initialConsonant}"]`);
@@ -374,12 +360,10 @@
                         renderSecondaryFilter(initialConsonant, data);
                     }
                 }
-
                 primaryFilter.addEventListener('click', (e) => {
                     const button = e.target.closest('button.primary-btn');
                     if (!button) return;
                     const consonant = button.dataset.consonant;
-                    
                     if (activePrimaryBtn === button) {
                         activePrimaryBtn.classList.remove('active');
                         activePrimaryBtn = null;
@@ -390,14 +374,11 @@
                         if (activePrimaryBtn) activePrimaryBtn.classList.remove('active');
                         button.classList.add('active');
                         activePrimaryBtn = button;
-                        
                         renderConsonantGroup(consonant, data);
                         renderSecondaryFilter(consonant, data);
-                        
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 });
-
                 secondaryFilter.addEventListener('click', (e) => {
                     if (e.target.tagName === 'A') {
                         e.preventDefault();
@@ -410,7 +391,6 @@
                         }
                     }
                 });
-                
                 scrollLeftBtn.addEventListener('click', () => {
                     secondaryFilter.scrollBy({ left: -250, behavior: 'smooth' });
                 });
@@ -419,19 +399,39 @@
                 });
             }
 
+            // --- 검색 팝업 관련 스크립트 ---
             const searchFab = document.getElementById('search-fab');
             const searchModalOverlay = document.getElementById('search-modal-overlay');
             const searchModal = document.getElementById('search-modal');
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
+            const koreanDictBtn = document.getElementById('korean-dict-btn');
+            const hanjaDictBtn = document.getElementById('hanja-dict-btn');
+            const chatbotSearchBtn = document.getElementById('chatbot-search-btn');
+
+            // --- [추가할 코드] Ctrl+F 단축키로 검색창 열기 ---
+window.addEventListener('keydown', (e) => {
+    // Ctrl 키(Windows) 또는 Command 키(Mac)가 'f'키와 함께 눌렸는지 확인합니다.
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        // 브라우저의 기본 '찾기' 기능을 막습니다.
+        e.preventDefault();
+        
+        // 우리가 만든 검색 팝업창을 여는 함수를 호출합니다.
+        openModal();
+    }
+});
+
+            const closeModalOnScroll = () => closeModal();
 
             function openModal() {
                 searchModalOverlay.classList.remove('hidden');
                 searchModal.classList.remove('hidden');
                 searchInput.focus();
+                window.addEventListener('scroll', closeModalOnScroll);
             }
 
             function closeModal() {
+                window.removeEventListener('scroll', closeModalOnScroll);
                 searchModalOverlay.classList.add('hidden');
                 searchModal.classList.add('hidden');
             }
@@ -442,9 +442,37 @@
             searchForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const searchTerm = searchInput.value.trim();
+                window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+            });
+
+            koreanDictBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                const url = searchTerm ? `https://ko.dict.naver.com/#/search?query=${encodeURIComponent(searchTerm)}` : 'https://ko.dict.naver.com/';
+                window.open(url, '_blank');
+            });
+
+            hanjaDictBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                const url = searchTerm ? `https://hanja.naver.com/search?query=${encodeURIComponent(searchTerm)}` : 'https://hanja.naver.com/';
+                window.open(url, '_blank');
+            });
+
+            chatbotSearchBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                const chatbotUrl = e.currentTarget.href;
                 if (searchTerm) {
-                    window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+                    try {
+                        await navigator.clipboard.writeText(searchTerm);
+                        showToast('검색어가 클립보드에 복사되었습니다.');
+                    } catch (err) {
+                        console.error('클립보드 복사 실패:', err);
+                        showToast('클립보드 복사에 실패했습니다.');
+                    }
                 }
+                window.open(chatbotUrl, '_blank');
             });
         });
     </script>
