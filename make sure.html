@@ -3,827 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>어사문 한자 학습</title>
+    <title>한자 데이터베이스 검수 도구</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --topbar-height: 60px; } /* 상단바 높이 조정 */
-        html { scroll-behavior: smooth; overflow-x: hidden; }
         body {
-            font-family: "Paperlogy", -apple-system, BlinkMacSystemFont, "Segoe UI",Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            background-color: #FFFDE7; color: #333333;
-            padding-top: calc(var(--topbar-height) + 20px); 
+            font-family: 'Noto Sans KR', sans-serif;
         }
-        ::-webkit-scrollbar { width: 12px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: rgba(255, 140, 0, 0.6); border-radius: 10px; border: 3px solid #FFFDE7; }
-        ::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 140, 0, 0.8); }
-        
-        .interactive-box:focus-visible, button:focus-visible, a:focus-visible {
-            outline: none; box-shadow: 0 0 0 3px #FF8C00, 0 0 15px rgba(255, 140, 0, 0.5);
+        .hanja-char {
+            font-size: 8rem;
+            line-height: 1;
         }
-
-        .kpi-card {
-            background-color: white; border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            border: 2px solid transparent;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-        
-        .content-section { scroll-margin-top: calc(var(--topbar-height) + 1rem); }
-        .vocab-details { 
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e5e7eb;
-            space-y: 0.5rem;
-        }
-        #toast-notification {
-            transform: translate(-50%, 10px); opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-        }
-        #toast-notification.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
-        
-        .modal-popup {
-            position: fixed; inset: 0; z-index: 50;
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem;
-            background-color: rgba(0,0,0,0.4);
-            pointer-events: none;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s;
-        }
-        .modal-popup.open { 
-            opacity: 1; visibility: visible; 
-            pointer-events: auto;
-        }
-        .modal-popup-content {
-            background-color: #FFFBEB;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            padding: 1.5rem;
-            width: 90%;
-            transform: scale(0.95); opacity: 0;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-        .modal-popup.open .modal-popup-content { transform: scale(1); opacity: 1; }
-        
-        .syllable-display { gap: 1rem; }
-        .syllable-char-box {
-            position: relative; padding: 1rem; border-radius: 0.5rem;
-            transition: all 0.2s ease-in-out; border: 1px solid #d1d5db;
-            text-align: center;
+        .content-card {
             background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        .syllable-char-box:hover { background-color: #FEF3C7; border-color: #FDBA74; }
-        .syllable-char-box .hangul { font-size: 2.25rem; font-weight: bold; }
-        .syllable-char-box .hanja {
-            font-size: 0.8rem; color: #FF8C00;
-            position: absolute; right: 0.5rem; bottom: 0.5rem;
+        #summaryModal {
+            display: none;
+            /* Add other modal styles */
         }
-        
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .error-memo-textarea {
-            width: 100%;
-            padding: 4px 8px;
-            margin-top: 6px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 12px;
-            resize: vertical;
-            min-height: 40px;
-        }
-
-        #ai-result-modal-content strong { font-weight: bold; }
     </style>
 </head>
-<body class="antialiased">
+<body class="bg-gray-100 text-gray-800">
 
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></symbol>
-        <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
-        <symbol id="icon-youtube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10C2.5 6 7.5 4 12 4s9.5 2 9.5 3a24.12 24.12 0 0 1 0 10c0 1-5 3-9.5 3s-9.5-2-9.5-3Z"></path><path d="m10 8 6 4-6 4Z"></path></symbol>
-        <symbol id="icon-naver-dict" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
-        <symbol id="icon-google-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></symbol>
-        <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></symbol>
-        <symbol id="icon-more-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></symbol>
-        <symbol id="icon-syllable-analysis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="2"></circle><circle cx="12" cy="16" r="2"></circle></symbol>
-        <symbol id="icon-ai-text" viewBox="0 0 24 24"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="15" font-weight="bold" fill="currentColor">AI</text></symbol>
-        <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
-    </svg>
-
-    <div class="max-w-screen-2xl mx-auto lg:grid lg:grid-cols-12 lg:gap-x-8 px-4">
-        <div class="lg:col-span-8 xl:col-span-9">
-            <div class="relative min-h-screen">
-                <header id="topbar" class="fixed top-0 left-0 right-0 z-20 shadow-md bg-[#FFD700]/80 backdrop-blur-sm transition-transform duration-300" style="height: var(--topbar-height);">
-                    <div class="flex justify-center items-center h-full px-4 max-w-5xl mx-auto">
-                        <div class="flex items-center space-x-6">
-                            <a href="index.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="홈"><svg class="w-7 h-7 text-amber-900"><use href="#icon-home"></use></svg></a>
-                            <a href="search.html" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="검색하기"><svg class="w-7 h-7 text-amber-900"><use href="#icon-search"></use></svg></a>
-                            <a href="https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos" target="_blank" title="왕관유자봇" class="p-2 rounded-full hover:bg-black/10 transition-colors"><svg class="w-7 h-7 text-amber-900"><use href="#icon-ai-text"></use></svg></a>
-                            <a id="youtube-search-link" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full hover:bg-black/10 transition-colors" title="YouTube에서 검색">
-                                <svg class="w-7 h-7 text-amber-900"><use href="#icon-youtube"></use></svg>
-                            </a>
-                        </div>
-                    </div>
-                </header>
-
-                <main class="flex-1 p-4 sm:p-6 lg:p-10">
-                    <div class="max-w-5xl mx-auto mb-8">
-                        <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-lg font-bold mb-4">한자 ID로 바로가기</h3>
-                            <div class="flex items-center space-x-2">
-                                <input type="text" id="hanja-id-input" list="hanja-id-list" class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="ID (예: 1-1) 또는 훈음 (예: 가르칠 교) 입력">
-                                <datalist id="hanja-id-list"></datalist>
-                                <button id="goto-hanja-id-btn" class="px-4 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors flex-shrink-0">이동</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <section id="overview" class="content-section mb-24 md:mb-32">
-                        <div class="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto md:items-stretch">
-                            <div class="md:col-span-1">
-                                 <div id="overview-hanja-box" class="interactive-box kpi-card flex-1 flex flex-col items-center justify-center p-8 h-full" tabindex="0">
-                                     <div class="text-center">
-                                         <h1 id="main-hanja" class="text-8xl md:text-9xl font-semibold text-orange-600"></h1>
-                                         <p id="overview-huneum" class="text-4xl md:text-5xl text-orange-600 mt-4"></p>
-                                     </div>
-                                 </div>
-                            </div>
-                            <div id="overview-info-box" class="md:col-span-2 kpi-card interactive-box p-8 flex flex-col justify-center" tabindex="0">
-                                <div>
-                                    <h2 class="text-3xl font-bold mb-6 text-[#FF8C00]">한자 정보</h2>
-                                    <p class="text-xl text-gray-700 mb-3"><strong>목차:</strong> <span id="overview-index"></span></p>
-                                    <p class="text-xl text-gray-700 mb-3"><strong>전체 연번:</strong> <span id="overview-serial"></span></p>
-                                    <p class="text-xl text-gray-700"><strong>교과서 단어:</strong> <span id="overview-textbook"></span></p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section id="meaning" class="content-section mb-24 md:mb-32">
-                        <div class="max-w-5xl mx-auto">
-                            <h2 class="text-4xl font-bold mb-8 text-left">✨ 해설</h2>
-                            <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                                <div id="meaning-explanation-box" class="interactive-box kpi-card p-8 mb-8 bg-amber-50" tabindex="0">
-                                    <div class="flex items-start space-x-3">
-                                        <input type="checkbox" class="content-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mt-2 flex-shrink-0">
-                                        <div>
-                                            <h3 id="explanation-title" class="text-3xl font-bold mb-4 text-[#FF8C00]"></h3>
-                                            <p id="explanation-text" class="text-lg leading-relaxed"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="meanings-list" class="grid grid-cols-1 gap-6"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="vocabulary" class="content-section mb-24 md:mb-32">
-                        <div class="max-w-5xl mx-auto">
-                            <h2 class="text-4xl font-bold mb-8 text-left">📚 어휘</h2>
-                            <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                                <div id="vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="advanced-vocab" class="content-section mb-16">
-                        <div class="max-w-5xl mx-auto">
-                            <h2 class="text-4xl font-bold mb-8 text-left">🚀 도약</h2>
-                            <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                                <div id="advanced-vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                            </div>
-                        </div>
-                    </section>
-                </main>
-            </div>
-        </div>
+    <div id="app" class="container mx-auto p-4 md:p-8">
         
-        <div class="lg:col-span-4 xl:col-span-3">
-            <div id="review-panel" class="sticky top-[20px] space-y-6 py-8 hidden lg:block">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-bold mb-4">
-                        검수 진행 <span id="review-hanja-id" class="text-orange-600 font-mono"></span>
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <button id="prev-hanja" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50">&lt; 이전</button>
-                        <span id="review-progress" class="font-semibold text-lg tabular-nums"></span>
-                        <button id="next-hanja" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50">다음 &gt;</button>
+        <!-- 로딩 화면 -->
+        <div id="loader" class="text-center py-20">
+            <h1 class="text-2xl font-bold">데이터를 불러오는 중입니다...</h1>
+            <p class="text-gray-600">잠시만 기다려주세요.</p>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <main id="main-content" class="hidden">
+            <header class="mb-6">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">한자 데이터베이스 검수 도구</h1>
+                <p class="text-lg text-gray-600">1-1부터 10-182까지의 데이터를 순서대로 검수합니다.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- 좌측: 데이터 표시 영역 -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 기본 정보 -->
+                    <div class="content-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 id="hanja-id" class="text-2xl font-bold text-indigo-600"></h2>
+                                <p id="hanja-serial" class="text-sm text-gray-500"></p>
+                            </div>
+                            <div id="hanja-char" class="hanja-char text-gray-800"></div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-3xl font-semibold" id="hanja-huneum"></p>
+                            <p class="text-xl text-gray-600" id="hanja-sound"></p>
+                            <p class="mt-2 text-sm text-blue-700 bg-blue-100 rounded-full px-3 py-1 inline-block" id="hanja-textbook"></p>
+                        </div>
+                    </div>
+
+                    <!-- 상세 설명 -->
+                    <div class="content-card">
+                        <h3 class="text-xl font-bold mb-3 border-b pb-2">상세 설명</h3>
+                        <p id="hanja-explanation" class="text-base leading-relaxed whitespace-pre-wrap"></p>
+                    </div>
+
+                    <!-- 뜻과 예문 -->
+                    <div class="content-card">
+                        <h3 class="text-xl font-bold mb-3 border-b pb-2">뜻과 예문</h3>
+                        <div id="hanja-meanings" class="space-y-4"></div>
+                    </div>
+
+                    <!-- 관련 단어 -->
+                    <div class="content-card">
+                        <h3 class="text-xl font-bold mb-3 border-b pb-2">관련 단어</h3>
+                        <div id="hanja-vocabulary" class="space-y-4"></div>
+                    </div>
+                    
+                    <!-- 심화 단어 -->
+                    <div id="advanced-card" class="content-card">
+                        <h3 class="text-xl font-bold mb-3 border-b pb-2">심화 단어</h3>
+                        <div id="hanja-advanced-vocabulary" class="flex flex-wrap gap-2"></div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-bold mb-4">AI 검수 기능</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="api-key-input" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <input type="password" id="api-key-input" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="API 키를 입력하세요">
-                                <button id="save-api-key-btn" class="px-4 py-2 bg-gray-600 text-white font-semibold text-sm rounded-md hover:bg-gray-700 transition-colors flex-shrink-0">저장</button>
+
+                <!-- 우측: 검수 및 네비게이션 영역 -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8">
+                        <div class="content-card">
+                            <h3 class="text-xl font-bold mb-4">검수 진행</h3>
+                            <div class="flex justify-between items-center bg-gray-200 rounded-lg p-4">
+                                <button id="prevBtn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">&lt; 이전</button>
+                                <div id="progress" class="text-center font-semibold text-lg"></div>
+                                <button id="nextBtn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">다음 &gt;</button>
                             </div>
                         </div>
-                        <div>
-                            <label for="gemini-model-select" class="block text-sm font-medium text-gray-700">Gemini 모델</label>
-                            <select id="gemini-model-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
-                                <option>gemini-1.5-flash-latest</option>
-                                <option>gemini-1.5-pro-latest</option>
-                                <option>gemini-2.5-flash-latest</option>
-                                <option>gemini-2.5-pro-latest</option>
-                            </select>
+
+                        <div class="content-card">
+                            <h3 class="text-xl font-bold mb-4">오류 체크 및 메모</h3>
+                            <div class="flex items-center mb-4">
+                                <input type="checkbox" id="errorCheck" class="h-6 w-6 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                <label for="errorCheck" class="ml-3 text-lg font-medium text-gray-900">오류 확인</label>
+                            </div>
+                            <textarea id="memoArea" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="이 항목에 대한 오류나 특이사항을 메모하세요..."></textarea>
                         </div>
-                        <div>
-                            <label for="ai-prompt-textarea" class="block text-sm font-medium text-gray-700">AI 명령어</label>
-                            <textarea id="ai-prompt-textarea" rows="5" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
-                        </div>
-                        <button id="run-ai-review-btn" class="w-full px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">AI 검수 실행</button>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-lg font-bold">오류 취합</h3>
-                        <div class="flex items-center space-x-2">
-                            <select id="sort-errors-by" class="text-sm rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                                <option value="default">기본 정렬</option>
-                                <option value="id-asc">ID 오름차순</option>
-                                <option value="section">섹션별</option>
-                            </select>
-                            <button id="copy-aggregated-errors-btn" title="오류 목록 복사" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                                <svg class="w-5 h-5 text-gray-600"><use href="#icon-copy"></use></svg>
-                            </button>
+                        
+                        <div class="content-card">
+                            <h3 class="text-xl font-bold mb-4">검수 현황</h3>
+                            <button id="showSummaryBtn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-200">오류 체크 항목 보기</button>
                         </div>
                     </div>
-                    <div id="aggregated-errors-list" class="max-h-96 overflow-y-auto border rounded-md p-2 bg-gray-50">
-                        </div>
                 </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 오류 요약 모달 -->
+    <div id="summaryModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-2xl font-bold">오류 체크 항목 요약</h2>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div id="summaryContent" class="p-6 overflow-y-auto">
+                <!-- 요약 내용이 여기에 들어갑니다. -->
             </div>
         </div>
     </div>
-    
-    <div id="toast-notification" class="fixed bottom-10 left-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50"></div>
-    <div id="syllable-modal" class="modal-popup">
-        <div class="modal-popup-content max-w-md">
-            <div class="syllable-display flex flex-wrap justify-center items-center text-center"></div>
-        </div>
-    </div>
-    <div id="actions-modal" class="modal-popup">
-        <div class="modal-popup-content max-w-xs">
-            <div class="actions-popup-content flex justify-around items-center gap-x-4"></div>
-        </div>
-    </div>
-    <div id="ai-result-modal" class="modal-popup">
-        <div class="modal-popup-content w-11/12 max-w-7xl h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-               <h2 class="text-2xl font-bold">AI 검수 결과</h2>
-               <button id="close-ai-modal-btn" class="text-gray-500 hover:text-gray-800 font-bold text-2xl">&times;</button>
-            </div>
-            <div id="ai-result-modal-content" class="flex-1 overflow-y-auto bg-gray-50 p-2 rounded-md border"></div>
-       </div>
-   </div>
+
 
     <script>
-    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+        document.addEventListener('DOMContentLoaded', () => {
+            const appState = {
+                allData: [],
+                currentIndex: 0,
+                reviewData: {}
+            };
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const params = new URLSearchParams(window.location.search);
-            const hanjaId = params.get('id');
+            const ui = {
+                loader: document.getElementById('loader'),
+                mainContent: document.getElementById('main-content'),
+                hanjaId: document.getElementById('hanja-id'),
+                serial: document.getElementById('hanja-serial'),
+                hanjaChar: document.getElementById('hanja-char'),
+                huneum: document.getElementById('hanja-huneum'),
+                sound: document.getElementById('hanja-sound'),
+                textbook: document.getElementById('hanja-textbook'),
+                explanation: document.getElementById('hanja-explanation'),
+                meanings: document.getElementById('hanja-meanings'),
+                vocabulary: document.getElementById('hanja-vocabulary'),
+                advancedCard: document.getElementById('advanced-card'),
+                advancedVocabulary: document.getElementById('hanja-advanced-vocabulary'),
+                prevBtn: document.getElementById('prevBtn'),
+                nextBtn: document.getElementById('nextBtn'),
+                progress: document.getElementById('progress'),
+                errorCheck: document.getElementById('errorCheck'),
+                memoArea: document.getElementById('memoArea'),
+                showSummaryBtn: document.getElementById('showSummaryBtn'),
+                summaryModal: document.getElementById('summaryModal'),
+                closeModalBtn: document.getElementById('closeModalBtn'),
+                summaryContent: document.getElementById('summaryContent'),
+            };
 
-            const response = await fetch('./data/hanja_db.json');
-            if (!response.ok) throw new Error('데이터베이스 파일을 불러올 수 없습니다.');
-            const allHanjaData = await response.json();
-
-            initializeIdFinder(allHanjaData);
-            initializeAggregatedErrors(allHanjaData);
-
-            if (!hanjaId) {
-                document.querySelector('main').innerHTML = `
-                    <div class="max-w-5xl mx-auto mb-8">
-                        <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-lg font-bold mb-4">한자 ID로 바로가기</h3>
-                            <div class="flex items-center space-x-2">
-                                <input type="text" id="hanja-id-input" list="hanja-id-list" class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="ID (예: 1-1) 또는 훈음 (예: 가르칠 교) 입력">
-                                <datalist id="hanja-id-list"></datalist>
-                                <button id="goto-hanja-id-btn" class="px-4 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors flex-shrink-0">이동</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center p-10 text-gray-600">
-                        <h1 class="text-2xl font-bold">한자를 선택해주세요.</h1>
-                        <p>위 검색창에서 ID나 훈음으로 한자를 검색하여 학습을 시작하세요.</p>
-                    </div>`;
-                initializeIdFinder(allHanjaData);
-                return;
-            }
-
-            const currentHanjaData = allHanjaData.find(item => item.id === hanjaId);
-
-            if (currentHanjaData) {
-                renderPage(currentHanjaData, allHanjaData);
-                addAllEventListeners(currentHanjaData, allHanjaData);
-                initializeReviewPanel(currentHanjaData, allHanjaData);
-                initializeAiReviewPanel(currentHanjaData);
-            } else {
-                throw new Error("해당 ID의 한자 정보를 찾을 수 없습니다.");
-            }
-        } catch (error) {
-            console.error("페이지 로딩 오류:", error);
-        }
-    });
-
-    const ALL_ERRORS_STORAGE_KEY = 'hanjaAllErrors';
-
-    function getErrors() {
-        return JSON.parse(localStorage.getItem(ALL_ERRORS_STORAGE_KEY) || '{}');
-    }
-
-    function saveErrors(errors) {
-        localStorage.setItem(ALL_ERRORS_STORAGE_KEY, JSON.stringify(errors));
-    }
-
-    function renderPage(data, allHanjaData) {
-        document.title = `[${data.id.replace('-', '권_')}] ${data.serial}_${data.huneum}`;
-        
-        document.getElementById('youtube-search-link').href = `https://www.youtube.com/@CrownYuja/search?query=${encodeURIComponent(data.huneum)}`;
-        document.getElementById('main-hanja').textContent = data.hanja;
-        document.getElementById('overview-huneum').textContent = data.huneum;
-        document.getElementById('overview-index').textContent = `어사문 [${data.id.replace('-', '권_')}]`;
-        document.getElementById('overview-serial').textContent = data.serial;
-        document.getElementById('overview-textbook').textContent = data.textbook || '없음';
-        document.getElementById('explanation-title').innerHTML = `${data.huneum} (<strong class="font-bold">${data.hanja}</strong>)`;
-        document.getElementById('explanation-text').innerHTML = data.explanation.replace(/(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|'[^']+')/g, '<strong class="font-bold text-[#4CAF50]">$1</strong>');
-        
-        const advancedVocabSection = document.getElementById('advanced-vocab');
-        if (!data.advancedVocabulary || data.advancedVocabulary.length === 0) {
-            if (advancedVocabSection) advancedVocabSection.style.display = 'none';
-        }
-        
-        const allErrors = getErrors();
-
-        const setupContentCheckbox = (box, section, title) => {
-            const uniqueId = `${data.id}-${section}-${title}`;
-            box.dataset.uniqueId = uniqueId;
-            box.dataset.hanjaId = data.id;
-            box.dataset.section = section;
-            box.dataset.word = title;
-            box.checked = !!allErrors[uniqueId];
-        };
-
-        setupContentCheckbox(document.querySelector('#meaning-explanation-box .content-error-checkbox'), '해설', data.huneum);
-        
-        const renderItems = (container, dataList, cardCreator) => {
-            if (container && dataList?.length > 0) container.innerHTML = dataList.map((item, index) => cardCreator(item, index)).join('');
-        };
-
-        const createMeaningCardHTML = (m, index) => {
-            const uniqueId = `${data.id}-의미-${m.title}`;
-            return `<div class="interactive-box kpi-card p-6" tabindex="0">
-                <div class="flex items-start space-x-3">
-                    <input type="checkbox" class="content-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mt-1 flex-shrink-0"
-                           data-unique-id="${uniqueId}" data-hanja-id="${data.id}" data-section="의미" data-word="${m.title}" ${allErrors[uniqueId] ? 'checked' : ''}>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 text-[#4CAF50]">${m.title}</h3>
-                        <p class="text-gray-700">${m.definition.replace(/│/g, '')}</p>
-                        <p class="text-sm italic text-gray-500 mt-2">예: ${m.example}</p>
-                    </div>
-                </div>
-            </div>`;
-        };
-        
-        const createVocabularyCardHTML = (v, index, isAdvanced = false) => {
-            const section = isAdvanced ? '도약' : '어휘';
-            const vocabTitle = isAdvanced ? v.word : v.title;
-            const uniqueId = `${data.id}-${section}-${vocabTitle}`;
-            
-            const titleHTML = isAdvanced ? `<h3 class="text-2xl font-bold">${v.word}</h3>` : `<h3 class="text-2xl font-bold">${v.title.replace(/(\([^)]+\))/g, '<strong class="font-bold text-orange-600">$1</strong>')}</h3>`;
-            const actionsHTML = `<div class="flex items-center">
-                <button class="syllable-analysis-btn p-2 rounded-full hover:bg-gray-100" title="음절 분석"><svg class="w-6 h-6 text-gray-500"><use href="#icon-syllable-analysis"></use></svg></button>
-                <button class="vocab-actions-toggle flex-shrink-0 p-2 -mr-2 rounded-full hover:bg-gray-100"><svg class="w-6 h-6 text-gray-500"><use href="#icon-more-vertical"></use></svg></button>
-            </div>`;
-            const linkHTML = isAdvanced ? `<a href="hanja-detail.html?id=${v.linkId}" class="vocab-link inline-flex items-center font-bold text-xs py-0.5 px-2 rounded-full" data-volume="${v.linkId.split('-')[0]}">${v.linkId.replace('-', '권_')} <svg class="w-5 h-5 ml-1"><use href="#icon-arrow-right"></use></svg></a>` : '';
-            
-            let detailsHTML;
-            if (isAdvanced) {
-                detailsHTML = `<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">${linkHTML}${actionsHTML}</div>`;
-            } else {
-                detailsHTML = `<div class="vocab-details"><p><strong>뜻:</strong> ${v.definition}</p><p><strong>구성:</strong> ${v.composition}</p>${v.analysis ? `<p><strong>풀이:</strong> ${v.analysis}</p>` : ''}<p class="italic"><strong>예:</strong> ${v.example}</p></div>`;
-            }
-
-            return `<div class="kpi-card interactive-box relative p-6" data-word="${vocabTitle}">
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center space-x-3">
-                        <input type="checkbox" class="content-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500" 
-                               data-unique-id="${uniqueId}" 
-                               data-hanja-id="${data.id}" 
-                               data-section="${section}" 
-                               data-word="${vocabTitle}" 
-                               ${allErrors[uniqueId] ? 'checked' : ''}>
-                        ${titleHTML}
-                    </div>
-                    ${!isAdvanced ? actionsHTML : ''}
-                </div>
-                ${detailsHTML}
-            </div>`;
-        };
-
-        renderItems(document.getElementById('meanings-list'), data.meanings, createMeaningCardHTML);
-        renderItems(document.getElementById('vocabulary-list'), data.vocabulary, (v, i) => createVocabularyCardHTML(v, i, false));
-        renderItems(document.getElementById('advanced-vocabulary-list'), data.advancedVocabulary, (v, i) => createVocabularyCardHTML(v, i, true));
-    }
-    
-    function addAllEventListeners(hanjaData, allHanjaData) {
-        document.querySelectorAll('.syllable-analysis-btn').forEach(btn => btn.addEventListener('click', (e) => handleSyllableAnalysis(e, allHanjaData)));
-        document.querySelectorAll('.vocab-actions-toggle').forEach(btn => btn.addEventListener('click', (e) => handleActionsPopup(e)));
-        document.querySelectorAll('.content-error-checkbox').forEach(box => box.addEventListener('change', (e) => handleErrorCheck(e, allHanjaData)));
-
-        const getBadgeColorClasses = (v) => ['','bg-red-200 text-red-800','bg-blue-200 text-blue-800','bg-green-200 text-green-800','bg-yellow-200 text-yellow-800','bg-indigo-200 text-indigo-800','bg-purple-200 text-purple-800','bg-pink-200 text-pink-800','bg-teal-200 text-teal-800','bg-slate-300 text-slate-800','bg-orange-300 text-orange-800'][parseInt(v, 10)] || '';
-        document.querySelectorAll('.vocab-link').forEach(link => link.classList.add(...getBadgeColorClasses(link.dataset.volume).split(' ')));
-
-        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
-        document.querySelectorAll('.modal-popup').forEach(modal => {
-            modal.addEventListener('click', (e) => { if (e.target === modal) closeAllPopups(); });
-        });
-    }
-
-    function closeAllPopups() {
-        document.querySelectorAll('.modal-popup.open').forEach(p => p.classList.remove('open'));
-    }
-    
-    function handleSyllableAnalysis(e, allHanjaData) {
-        const card = e.currentTarget.closest('.kpi-card');
-        const title = card.dataset.word;
-        e.stopPropagation();
-        
-        const match = title.match(/([^\(]+)\(([^\)]+)\)/);
-        if (!match) return;
-
-        const [_, hangul, hanjaStr] = match;
-        document.getElementById('syllable-modal').querySelector('.syllable-display').innerHTML = hangul.split('').map((hangulChar, i) => {
-            const hanjaChar = hanjaStr[i];
-            const linkedHanja = allHanjaData.find(item => item.hanja === hanjaChar);
-            const content = `<div class="hangul">${hangulChar}</div><div class="hanja">${hanjaChar}</div>`;
-            return linkedHanja
-                ? `<a href="?id=${linkedHanja.id}" class="syllable-char-box block">${content}</a>`
-                : `<a href="https://hanja.naver.com/search?query=${encodeURIComponent(hanjaChar)}" target="_blank" class="syllable-char-box block">${content}</a>`;
-        }).join('');
-        
-        document.getElementById('syllable-modal').classList.add('open');
-    }
-    
-    function handleActionsPopup(e) {
-        const card = e.currentTarget.closest('.kpi-card');
-        const title = card.dataset.word;
-        e.stopPropagation();
-        
-        const actionsContent = document.getElementById('actions-modal').querySelector('.actions-popup-content');
-        actionsContent.innerHTML = `
-            <button class="ai-link p-3 rounded-full text-purple-500 hover:bg-gray-100" data-word="${title}"><svg class="w-8 h-8"><use href="#icon-ai-text"></use></svg></button>
-            <button class="naver-dictionary-link p-3 rounded-full hover:bg-gray-100" data-word="${title}"><svg class="w-7 h-7 text-green-500"><use href="#icon-naver-dict"></use></svg></button>
-            <button class="google-image-link p-3 rounded-full hover:bg-gray-100" data-word="${title}"><svg class="w-7 h-7 text-orange-500"><use href="#icon-google-img"></use></svg></button>`;
-        
-        actionsContent.querySelector('.ai-link').addEventListener('click', handleAiLink);
-        actionsContent.querySelector('.naver-dictionary-link').addEventListener('click', (ev) => handleSearchLink(ev, 'https://hanja.naver.com/search?query='));
-        actionsContent.querySelector('.google-image-link').addEventListener('click', (ev) => handleSearchLink(ev, 'https://www.google.com/search?tbm=isch&q='));
-
-        document.getElementById('actions-modal').classList.add('open');
-    }
-
-    function handleHeaderScroll() {
-        const topbar = document.getElementById('topbar');
-        if (topbar) topbar.style.transform = window.scrollY > 10 ? 'translateY(-100%)' : 'translateY(0%)';
-    }
-
-    function handleSearchLink(e, baseUrl) {
-        const title = e.currentTarget.dataset.word;
-        if (title) {
-            const query = e.currentTarget.classList.contains('google-image-link') ? title.replace(/\(.*\)/, '').trim() : title;
-            window.open(`${baseUrl}${encodeURIComponent(query)}`, '_blank');
-        }
-    }
-
-    async function handleAiLink(e) {
-        const title = e.currentTarget.dataset.word;
-        if (title) {
-            try {
-                await navigator.clipboard.writeText(title); 
-                showToast('어휘가 클립보드에 복사되었습니다.'); 
-                window.open('https://chatgpt.com/g/g-6tdiusZks-1-eosamun-wanggwanyujabos', '_blank');
-            } catch (err) { showToast('클립보드 복사에 실패했습니다.', 'error'); }
-        }
-    }
-
-    let toastTimeout;
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast-notification');
-        toast.textContent = message;
-        toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-lg z-50 ${type === 'error' ? 'bg-red-600' : 'bg-gray-800'} text-white show`;
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
-
-    function initializeIdFinder(allHanjaData) {
-        const idInput = document.getElementById('hanja-id-input');
-        const gotoBtn = document.getElementById('goto-hanja-id-btn');
-        const datalist = document.getElementById('hanja-id-list');
-        if (!idInput || !gotoBtn || !datalist) return;
-
-        datalist.innerHTML = allHanjaData.map(item => `<option value="${item.id}"></option><option value="${item.huneum}"></option>`).join('');
-
-        const handleGoToId = () => {
-            const target = allHanjaData.find(item => item.id === idInput.value || item.huneum === idInput.value);
-            if (target) window.location.search = `?id=${target.id}`;
-            else showToast('해당 ID 또는 훈음을 찾을 수 없습니다.', 'error');
-        };
-
-        gotoBtn.addEventListener('click', handleGoToId);
-        idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleGoToId(); });
-    }
-
-    function syncErrorWithGoogleSheet(errorData) {
-        if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST', mode: 'no-cors',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(errorData)
-        }).catch(error => console.error('Google Sheet 동기화 실패:', error));
-    }
-
-    function handleErrorCheck(event) {
-        const checkbox = event.target;
-        const { uniqueId, hanjaId, word, section } = checkbox.dataset;
-        const errors = getErrors();
-        
-        let action;
-        if (checkbox.checked) {
-            action = 'add';
-            errors[uniqueId] = { hanjaId, word, section, memo: '' };
-        } else {
-            action = 'remove';
-            delete errors[uniqueId];
-        }
-        
-        saveErrors(errors);
-        renderAggregatedErrors();
-        syncErrorWithGoogleSheet({ action, uniqueId, hanjaId, word, section });
-    }
-    
-    function renderAggregatedErrors() {
-        const container = document.getElementById('aggregated-errors-list');
-        const sortMethod = document.getElementById('sort-errors-by').value;
-        if (!container) return;
-        
-        const errors = getErrors();
-        let errorItems = Object.entries(errors).map(([uniqueId, data]) => ({ uniqueId, ...data }));
-        
-        if (sortMethod === 'id-asc') {
-            errorItems.sort((a, b) => a.hanjaId.localeCompare(b.hanjaId, undefined, {numeric: true}));
-        } else if (sortMethod === 'section') {
-            errorItems.sort((a, b) => a.section.localeCompare(b.section) || a.hanjaId.localeCompare(b.hanjaId, undefined, {numeric: true}));
-        }
-
-        if (errorItems.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-sm p-2">체크된 오류 항목이 없습니다.</p>';
-            return;
-        }
-
-        container.innerHTML = errorItems.map(({ uniqueId, hanjaId, word, section, memo }) => `
-            <div class="relative text-sm p-2 border-b last:border-b-0">
-                 <button class="delete-error-btn absolute top-1 right-1 text-gray-400 hover:text-red-500 font-bold text-lg leading-none p-1" data-unique-id="${uniqueId}" title="삭제">&times;</button>
-                <p class="font-bold pr-4">${word}</p>
-                <p class="text-gray-600">ID: ${hanjaId} / 섹션: ${section}</p>
-                <textarea class="error-memo-textarea" data-unique-id="${uniqueId}" placeholder="메모 입력...">${memo || ''}</textarea>
-            </div>
-        `).join('');
-    }
-
-    function initializeAggregatedErrors() {
-        renderAggregatedErrors();
-
-        document.getElementById('sort-errors-by').addEventListener('change', renderAggregatedErrors);
-        
-        document.getElementById('copy-aggregated-errors-btn').addEventListener('click', () => {
-            const errors = getErrors();
-            const errorItems = Object.values(errors);
-            if (errorItems.length === 0) {
-                showToast('복사할 오류 항목이 없습니다.', 'error');
-                return;
-            }
-            const tsvString = ["ID\t어휘/내용\t섹션\t메모", ...errorItems.map(e => `${e.hanjaId}\t${e.word}\t${e.section}\t${e.memo || ''}`)].join('\n');
-            
-            navigator.clipboard.writeText(tsvString).then(() => {
-                showToast('오류 목록이 클립보드에 복사되었습니다.');
-                window.open('https://docs.google.com/spreadsheets/d/1jJQIiQD0jKo7kE2JSP7-dlRgUosvU76sWWxor_HrASk/edit?gid=0#gid=0', '_blank');
-            }, (err) => {
-                showToast('복사에 실패했습니다.', 'error');
-                console.error('클립보드 복사 실패:', err);
-            });
-        });
-        
-        const errorListContainer = document.getElementById('aggregated-errors-list');
-
-        errorListContainer.addEventListener('input', (e) => {
-            if (e.target.classList.contains('error-memo-textarea')) {
-                const uniqueId = e.target.dataset.uniqueId;
-                const errors = getErrors();
-                if (errors[uniqueId]) {
-                    errors[uniqueId].memo = e.target.value;
-                    saveErrors(errors);
-                }
-            }
-        });
-        
-        errorListContainer.addEventListener('click', (e) => {
-            const deleteBtn = e.target.closest('.delete-error-btn');
-            if (deleteBtn) {
-                const uniqueId = deleteBtn.dataset.uniqueId;
-                const errors = getErrors();
-                if (errors[uniqueId]) {
-                    const { hanjaId, word, section } = errors[uniqueId];
+            async function loadAllData() {
+                try {
+                    const fileNames = Array.from({ length: 10 }, (_, i) => `data/volume_${i + 1}.json`);
+                    const promises = fileNames.map(file => fetch(file).then(res => res.json()));
+                    const allVolumes = await Promise.all(promises);
                     
-                    delete errors[uniqueId];
-                    saveErrors(errors);
+                    appState.allData = allVolumes.flat();
+                    appState.allData.sort((a, b) => a.serial - b.serial); // 연번(serial) 기준으로 정렬
 
-                    const correspondingCheckbox = document.querySelector(`.content-error-checkbox[data-unique-id="${uniqueId}"], .ai-error-checkbox[data-unique-id="${uniqueId}"]`);
-                    if (correspondingCheckbox) {
-                        correspondingCheckbox.checked = false;
-                    }
-
-                    renderAggregatedErrors();
-
-                    syncErrorWithGoogleSheet({ action: 'remove', uniqueId, hanjaId, word, section });
-                    showToast('오류 항목이 삭제되었습니다.');
-                }
-            }
-        });
-    }
-    
-    function initializeReviewPanel(currentHanjaData, allHanjaData) {
-        const reviewPanel = document.getElementById('review-panel');
-        if (!reviewPanel) return;
-        
-        const hanjaIdEl = document.getElementById('review-hanja-id');
-        const progressEl = document.getElementById('review-progress');
-        const prevBtn = document.getElementById('prev-hanja');
-        const nextBtn = document.getElementById('next-hanja');
-        
-        const currentIndex = allHanjaData.findIndex(item => item.id === currentHanjaData.id);
-        
-        hanjaIdEl.textContent = `[${currentHanjaData.id.replace('-', '권_')}] ${currentHanjaData.serial}`;
-        progressEl.textContent = `${currentIndex + 1} / ${allHanjaData.length}`;
-        prevBtn.disabled = currentIndex === 0;
-        nextBtn.disabled = currentIndex === allHanjaData.length - 1;
-
-        const navigateToHanja = (id) => { window.location.search = `?id=${id}`; };
-        prevBtn.onclick = () => { if (currentIndex > 0) navigateToHanja(allHanjaData[currentIndex - 1].id); };
-        nextBtn.onclick = () => { if (currentIndex < allHanjaData.length - 1) navigateToHanja(allHanjaData[currentIndex + 1].id); };
-    }
-
-    function initializeAiReviewPanel(currentHanjaData) {
-        const apiKeyInput = document.getElementById('api-key-input');
-        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-        const modelSelect = document.getElementById('gemini-model-select');
-        const promptTextarea = document.getElementById('ai-prompt-textarea');
-        const runBtn = document.getElementById('run-ai-review-btn');
-        const aiModal = document.getElementById('ai-result-modal');
-        const aiModalContent = document.getElementById('ai-result-modal-content');
-        const closeAiModalBtn = document.getElementById('close-ai-modal-btn');
-
-        if (!apiKeyInput || !saveApiKeyBtn || !runBtn) return;
-
-        // Load saved key and set initial button state
-        const savedApiKey = localStorage.getItem('geminiApiKey') || '';
-        apiKeyInput.value = savedApiKey;
-        runBtn.disabled = !savedApiKey;
-        
-        // Save button event listener
-        saveApiKeyBtn.addEventListener('click', () => {
-            const key = apiKeyInput.value.trim();
-            if (key) {
-                localStorage.setItem('geminiApiKey', key);
-                runBtn.disabled = false;
-                showToast('API 키가 저장되었습니다.');
-            } else {
-                localStorage.removeItem('geminiApiKey');
-                runBtn.disabled = true;
-                showToast('API 키가 삭제되었습니다.', 'error');
-            }
-        });
-        
-        // Disable run button immediately if the field is cleared.
-        apiKeyInput.addEventListener('input', () => {
-            if (!apiKeyInput.value.trim()) {
-                runBtn.disabled = true;
-            }
-        });
-
-        const defaultPrompt = `당신은 한국 한자 교육 콘텐츠를 전문적으로 교정하는 AI 전문가입니다. 아래에 제공되는 JSON 형식의 한자 데이터를 검토하고, 다음과 같은 기준에 따라 오류나 어색한 부분을 찾아 한국어로 지적해 주세요.
-
-1.  **오탈자 및 문법 오류:** 모든 텍스트 필드에서 오탈자나 문법적 오류를 확인합니다.
-2.  **정보의 일관성:** 'huneum'(훈음)과 'hanja'(한자)가 일치하는지, 'explanation'(해설) 내용이 한자의 의미와 맞는지 확인합니다.
-3.  **뜻풀이의 정확성:** 'meanings'와 'vocabulary' 섹션의 'definition'(뜻)이 자연스럽고 정확한지 검토합니다.
-4.  **예문의 적절성:** 'example'(예문)이 해당 어휘의 의미를 잘 설명하며, 문맥상 자연스러운지 확인합니다.
-5.  **구성 및 풀이의 논리성:** 'composition'(구성)과 'analysis'(풀이)가 어원적으로나 논리적으로 타당한지 검토합니다.
-
-피드백은 "**[섹션명]**-오류내용" 형식으로 각 줄에 하나씩 제시해 주세요. 예를 들어, "**[어휘]**-예문 어색함", "**[해설]**-오탈자 발견" 과 같이 작성해야 합니다. 만약 오류가 없다면, "검토 결과, 내용에 오류가 없습니다."라고 명확히 응답해 주세요.`;
-        promptTextarea.value = defaultPrompt;
-        
-        closeAiModalBtn.onclick = () => aiModal.classList.remove('open');
-
-        runBtn.addEventListener('click', async () => {
-            const apiKey = localStorage.getItem('geminiApiKey');
-            if (!apiKey) {
-                showToast('저장된 API 키가 없습니다. 키를 입력하고 저장해주세요.', 'error');
-                return;
-            }
-            
-            const model = modelSelect.value;
-            const userPrompt = promptTextarea.value;
-            
-            const pageData = JSON.stringify({
-                id: currentHanjaData.id,
-                hanja: currentHanjaData.hanja,
-                huneum: currentHanjaData.huneum,
-                serial: currentHanjaData.serial,
-                explanation: currentHanjaData.explanation,
-                meanings: currentHanjaData.meanings,
-                vocabulary: currentHanjaData.vocabulary,
-                advancedVocabulary: currentHanjaData.advancedVocabulary,
-            }, null, 2);
-
-            aiModalContent.innerHTML = '<p class="text-sm text-gray-500 animate-pulse p-4">AI가 검수를 진행 중입니다...</p>';
-            aiModal.classList.add('open');
-            runBtn.disabled = true;
-
-            try {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ parts: [{ text: `${userPrompt}\n\n---\n\n${pageData}` }] }] };
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || 'API 요청에 실패했습니다.');
-                }
-
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (text) {
-                    const allErrors = getErrors();
-                    const suggestions = text.split('\n').filter(line => line.trim().startsWith('**['));
+                    loadReviewData();
                     
-                    if (suggestions.length === 0) {
-                         aiModalContent.innerHTML = `<p class="p-4">${text.replace(/\n/g, '<br>')}</p>`;
-                    } else {
-                        aiModalContent.innerHTML = suggestions.map(line => {
-                            const match = line.match(/\*\*\[(.*?)\]\*\*\s*-\s*(.*)/);
-                            if (!match) return `<div class="p-3 text-sm text-gray-500 border-b last:border-b-0">${line}</div>`;
-                            
-                            const section = match[1].trim();
-                            const word = match[2].trim();
-                            const hanjaId = currentHanjaData.id;
-                            const uniqueId = `${hanjaId}-AI-${section}-${word.replace(/\s/g, '').slice(0, 15)}`;
-                            const isChecked = !!allErrors[uniqueId];
+                    // 마지막으로 작업했던 위치 또는 0번 인덱스에서 시작
+                    const lastIndex = parseInt(localStorage.getItem('hanja_review_last_index') || '0', 10);
+                    appState.currentIndex = (lastIndex < appState.allData.length) ? lastIndex : 0;
+                    
+                    displayCurrentItem();
 
-                            return `<div class="flex items-start space-x-4 p-3 border-b last:border-b-0 hover:bg-amber-50 transition-colors">
-                                <input type="checkbox" class="ai-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mt-1 flex-shrink-0"
-                                       data-unique-id="${uniqueId}"
-                                       data-hanja-id="${hanjaId}"
-                                       data-section="AI 제안(${section})"
-                                       data-word="${word}"
-                                       ${isChecked ? 'checked' : ''}>
-                                <div class="flex-1">
-                                    <label class="font-medium text-gray-800 cursor-pointer">${word}</label>
-                                    <p class="text-sm text-blue-700 font-mono">[${section}]</p>
-                                </div>
-                            </div>`;
-                        }).join('');
-                    }
+                    ui.loader.style.display = 'none';
+                    ui.mainContent.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error("데이터 로딩 실패:", error);
+                    ui.loader.innerHTML = '<h1 class="text-2xl font-bold text-red-500">데이터 로딩에 실패했습니다.</h1><p>파일이 올바른 위치에 있는지 확인해주세요.</p>';
+                }
+            }
+
+            function displayCurrentItem() {
+                const item = appState.allData[appState.currentIndex];
+                if (!item) return;
+
+                ui.hanjaId.textContent = `ID: ${item.id}`;
+                ui.serial.textContent = `연번: ${item.serial}`;
+                ui.hanjaChar.textContent = item.hanja;
+                ui.huneum.textContent = item.huneum;
+                ui.sound.textContent = `음: ${item.sound}`;
+                ui.textbook.textContent = item.textbook || '해당 없음';
+                ui.textbook.style.display = item.textbook ? 'inline-block' : 'none';
+                ui.explanation.textContent = item.explanation;
+                
+                // 뜻과 예문 렌더링
+                ui.meanings.innerHTML = item.meanings.map(m => `
+                    <div class="border-l-4 border-indigo-200 pl-4">
+                        <p class="font-semibold text-lg">${m.title}</p>
+                        <p class="text-gray-600">${m.definition}</p>
+                        <p class="text-gray-800 mt-1 italic">"${m.example}"</p>
+                    </div>
+                `).join('');
+
+                // 관련 단어 렌더링
+                ui.vocabulary.innerHTML = item.vocabulary.map(v => `
+                    <div class="border-l-4 border-green-200 pl-4">
+                        <p class="font-semibold text-lg">${v.title}</p>
+                        <p class="text-gray-600">${v.definition}</p>
+                        <p class="text-sm text-gray-500">${v.composition} → ${v.analysis}</p>
+                        <p class="text-gray-800 mt-1 italic">"${v.example}"</p>
+                    </div>
+                `).join('');
+
+                // 심화 단어 렌더링
+                if (item.advancedVocabulary && item.advancedVocabulary.length > 0) {
+                    ui.advancedVocabulary.innerHTML = item.advancedVocabulary.map(av => `
+                        <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">${av.word} (${av.linkId})</span>
+                    `).join('');
+                    ui.advancedCard.style.display = 'block';
                 } else {
-                    aiModalContent.innerHTML = '<p class="text-sm text-red-500 p-4">AI로부터 유효한 응답을 받지 못했습니다.</p>';
+                    ui.advancedCard.style.display = 'none';
                 }
 
-            } catch (error) {
-                console.error('AI Review Error:', error);
-                aiModalContent.innerHTML = `<p class="text-sm text-red-500 p-4">오류 발생: ${error.message}</p>`;
-            } finally {
-                runBtn.disabled = false;
+                updateControls();
+                loadCurrentReviewState();
             }
-        });
 
-        aiModalContent.addEventListener('change', (e) => {
-            if (e.target.classList.contains('ai-error-checkbox')) {
-                handleErrorCheck(e);
+            function updateControls() {
+                ui.progress.textContent = `${appState.currentIndex + 1} / ${appState.allData.length}`;
+                ui.prevBtn.disabled = appState.currentIndex === 0;
+                ui.nextBtn.disabled = appState.currentIndex === appState.allData.length - 1;
+                localStorage.setItem('hanja_review_last_index', appState.currentIndex);
             }
+            
+            function loadCurrentReviewState() {
+                const currentId = appState.allData[appState.currentIndex].id;
+                const state = appState.reviewData[currentId] || { hasError: false, memo: '' };
+                ui.errorCheck.checked = state.hasError;
+                ui.memoArea.value = state.memo;
+            }
+
+            function saveCurrentReviewState() {
+                const currentId = appState.allData[appState.currentIndex].id;
+                appState.reviewData[currentId] = {
+                    hasError: ui.errorCheck.checked,
+                    memo: ui.memoArea.value
+                };
+                saveReviewData();
+            }
+
+            function saveReviewData() {
+                try {
+                    localStorage.setItem('hanja_review_data', JSON.stringify(appState.reviewData));
+                } catch (error) {
+                    console.error("리뷰 데이터 저장 실패:", error);
+                    alert("리뷰 데이터를 저장하는데 실패했습니다. 브라우저 저장 공간이 부족할 수 있습니다.");
+                }
+            }
+
+            function loadReviewData() {
+                const savedData = localStorage.getItem('hanja_review_data');
+                if (savedData) {
+                    appState.reviewData = JSON.parse(savedData);
+                }
+            }
+
+            function navigate(direction) {
+                const newIndex = appState.currentIndex + direction;
+                if (newIndex >= 0 && newIndex < appState.allData.length) {
+                    appState.currentIndex = newIndex;
+                    displayCurrentItem();
+                }
+            }
+            
+            function showSummary() {
+                const errorItems = Object.entries(appState.reviewData)
+                    .filter(([id, data]) => data.hasError)
+                    .map(([id, data]) => ({ ...appState.allData.find(item => item.id === id), ...data }));
+                
+                if (errorItems.length === 0) {
+                    ui.summaryContent.innerHTML = '<p class="text-center text-gray-600">아직 오류로 체크된 항목이 없습니다.</p>';
+                } else {
+                    ui.summaryContent.innerHTML = `
+                        <p class="mb-4 text-lg">총 <strong class="text-red-600">${errorItems.length}개</strong>의 항목이 오류로 체크되었습니다.</p>
+                        <div class="space-y-4">
+                            ${errorItems.map(item => `
+                                <div class="p-4 border rounded-lg bg-gray-50">
+                                    <p class="font-bold text-xl">${item.hanja} ${item.huneum} (ID: ${item.id})</p>
+                                    <p class="mt-2 p-3 bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg whitespace-pre-wrap">${item.memo || '작성된 메모가 없습니다.'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                ui.summaryModal.style.display = 'flex';
+            }
+
+            // 이벤트 리스너 설정
+            ui.prevBtn.addEventListener('click', () => navigate(-1));
+            ui.nextBtn.addEventListener('click', () => navigate(1));
+            ui.errorCheck.addEventListener('change', saveCurrentReviewState);
+            ui.memoArea.addEventListener('input', saveCurrentReviewState);
+            
+            ui.showSummaryBtn.addEventListener('click', showSummary);
+            ui.closeModalBtn.addEventListener('click', () => ui.summaryModal.style.display = 'none');
+            ui.summaryModal.addEventListener('click', (e) => {
+                if (e.target === ui.summaryModal) {
+                    ui.summaryModal.style.display = 'none';
+                }
+            });
+
+
+            // 초기화
+            loadAllData();
         });
-    }
     </script>
 </body>
 </html>
+
