@@ -55,8 +55,8 @@
         }
 
         body.using-keyboard #audio-controls button:hover {
-             background-color: rgba(251, 146, 60, 0.1);
-             transform: scale(1.1);
+            background-color: rgba(251, 146, 60, 0.1);
+            transform: scale(1.1);
         }
         
         .content-section { scroll-margin-top: calc(var(--topbar-height) + 1rem); }
@@ -161,6 +161,7 @@
         <symbol id="icon-naver-dict" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
         <symbol id="icon-google-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></symbol>
         <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></symbol>
+        <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></symbol>
         <symbol id="icon-more-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></symbol>
         <symbol id="icon-syllable-analysis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="2"></circle><circle cx="12" cy="16" r="2"></circle></symbol>
         <symbol id="icon-ai-text" viewBox="0 0 24 24"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="15" font-weight="bold" fill="currentColor">AI</text></symbol>
@@ -241,12 +242,35 @@
                 </div>
             </section>
 
-            <section id="advanced-vocab" class="content-section mb-16">
+            <section id="advanced-vocab" class="content-section">
                 <div class="max-w-5xl mx-auto">
                     <h2 class="text-4xl font-bold mb-8 text-left">🚀 도약</h2>
                     <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
                         <div id="advanced-vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                     </div>
+                </div>
+            </section>
+
+            <div class="max-w-5xl mx-auto my-12">
+                <hr class="border-t-2 border-amber-200">
+            </div>
+
+            <section id="page-navigation" class="content-section mb-24">
+                <div class="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <a id="prev-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-6 flex items-center justify-start text-left transition-all duration-300 ease-in-out group" tabindex="0">
+                        <svg class="w-7 h-7 mr-4 text-gray-400 group-hover:text-orange-500 transform group-hover:-translate-x-1 transition-transform flex-shrink-0"><use href="#icon-arrow-left"></use></svg>
+                        <div>
+                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">이전 한자</p>
+                            <p id="prev-hanja-title" class="text-xl font-bold text-gray-800"></p>
+                        </div>
+                    </a>
+                    <a id="next-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-6 flex items-center justify-end text-right transition-all duration-300 ease-in-out group" tabindex="0">
+                        <div>
+                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">다음 한자</p>
+                            <p id="next-hanja-title" class="text-xl font-bold text-gray-800"></p>
+                        </div>
+                        <svg class="w-7 h-7 ml-4 text-gray-400 group-hover:text-orange-500 transform group-hover:translate-x-1 transition-transform flex-shrink-0"><use href="#icon-arrow-right"></use></svg>
+                    </a>
                 </div>
             </section>
         </main>
@@ -406,11 +430,13 @@
             if (!response.ok) throw new Error('데이터베이스 파일을 불러올 수 없습니다.');
             const allHanjaData = await response.json();
 
-            const currentHanjaData = allHanjaData.find(item => item.id === hanjaId);
+            const currentIndex = allHanjaData.findIndex(item => item.id === hanjaId);
+            const currentHanjaData = allHanjaData[currentIndex];
 
             if (currentHanjaData) {
                 renderPage(currentHanjaData);
                 addAllEventListeners(currentHanjaData, allHanjaData);
+                setupNavigation(currentIndex, allHanjaData);
             } else {
                 throw new Error("해당 ID의 한자 정보를 찾을 수 없습니다.");
             }
@@ -419,6 +445,41 @@
             document.querySelector('main').innerHTML = `<div class="text-center p-10 text-red-600"><h1>페이지를 불러올 수 없습니다</h1><p>${error.message}</p></div>`;
         }
     });
+
+    function setupNavigation(currentIndex, allHanjaData) {
+        const prevLink = document.getElementById('prev-hanja-link');
+        const nextLink = document.getElementById('next-hanja-link');
+        const prevTitle = document.getElementById('prev-hanja-title');
+        const nextTitle = document.getElementById('next-hanja-title');
+
+        // 이전 링크 처리
+        if (currentIndex > 0) {
+            const prevHanja = allHanjaData[currentIndex - 1];
+            prevLink.href = `hanja-detail.html?id=${prevHanja.id}`;
+            const formattedPrevId = `[${prevHanja.id.replace('-', '권_')}]`;
+            prevTitle.textContent = `${formattedPrevId} ${prevHanja.hanja} ${prevHanja.huneum}`;
+            prevLink.classList.remove('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
+        } else {
+            prevLink.href = '#';
+            prevTitle.textContent = '첫 번째 한자입니다';
+            prevLink.classList.add('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
+            prevLink.addEventListener('click', e => e.preventDefault());
+        }
+
+        // 다음 링크 처리
+        if (currentIndex < allHanjaData.length - 1) {
+            const nextHanja = allHanjaData[currentIndex + 1];
+            nextLink.href = `hanja-detail.html?id=${nextHanja.id}`;
+            const formattedNextId = `[${nextHanja.id.replace('-', '권_')}]`;
+            nextTitle.textContent = `${formattedNextId} ${nextHanja.hanja} ${nextHanja.huneum}`;
+            nextLink.classList.remove('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
+        } else {
+            nextLink.href = '#';
+            nextTitle.textContent = '마지막 한자입니다';
+            nextLink.classList.add('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
+            nextLink.addEventListener('click', e => e.preventDefault());
+        }
+    }
 
     function renderPage(data) {
         document.title = `[${data.id.replace('-', '권_')}] ${data.serial}_${data.huneum}`;
@@ -499,7 +560,7 @@
             }
         });
         
-        document.querySelectorAll('.interactive-box, .footer-link, #audio-play-btn, #copy-notes-btn').forEach(el => {
+        document.querySelectorAll('.interactive-box, .footer-link, #audio-play-btn, #copy-notes-btn, .nav-link').forEach(el => {
             el.addEventListener('focus', () => {
                 setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
             });
@@ -563,7 +624,6 @@
         document.querySelectorAll('.modal-popup.open').forEach(p => p.classList.remove('open'));
     }
 
-    // --- [수정됨] 외부 링크 연결 시 확인 팝업을 띄우는 함수 ---
     function confirmAndOpenLink(url) {
         if (confirm("어사문에 없는 한자입니다. 한자사전으로 연결하시겠습니까?")) {
             window.open(url, '_blank', 'noopener,noreferrer');
@@ -587,12 +647,10 @@
             const linkedHanja = allHanjaData.find(item => item.hanja === hanjaChar);
             const content = `<div class="hangul">${hangulChar}</div><div class="hanja">${hanjaChar}</div>`;
             
-            // 데이터베이스에 없는 한자에 대한 URL을 미리 정의합니다.
             const naverUrl = `https://hanja.naver.com/search?query=${encodeURIComponent(hanjaChar)}`;
 
             return linkedHanja
                 ? `<a href="hanja-detail.html?id=${linkedHanja.id}" class="syllable-char-box block">${content}</a>`
-                // href는 링크 이동을 막고, onclick으로 새로운 확인 함수를 호출합니다.
                 : `<a href="javascript:void(0);" class="syllable-char-box block" onclick="confirmAndOpenLink('${naverUrl}')">${content}</a>`;
         }).join('');
         
@@ -749,7 +807,7 @@
     }
     
     function navigateWithArrows(key) {
-        const focusableElements = Array.from(document.querySelectorAll('#audio-play-btn, #copy-notes-btn, .interactive-box, .footer-link'));
+        const focusableElements = Array.from(document.querySelectorAll('#audio-play-btn, #copy-notes-btn, .interactive-box, .nav-link, .footer-link'));
         if (focusableElements.length === 0) return;
         let currentIndex = focusableElements.indexOf(document.activeElement);
         if (currentIndex === -1) { 
