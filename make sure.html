@@ -178,33 +178,6 @@
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-bold mb-4">AI 검수 기능</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="api-key-input" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <input type="password" id="api-key-input" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="API 키를 입력하세요">
-                                <button id="save-api-key-btn" class="px-4 py-2 bg-gray-600 text-white font-semibold text-sm rounded-md hover:bg-gray-700 transition-colors flex-shrink-0">저장</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="gemini-model-select" class="block text-sm font-medium text-gray-700">Gemini 모델</label>
-                            <select id="gemini-model-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
-                                <option>gemini-1.5-flash-latest</option>
-                                <option>gemini-1.5-pro-latest</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="ai-prompt-textarea" class="block text-sm font-medium text-gray-700">AI 명령어</label>
-                            <div class="relative mt-1">
-                               <textarea id="ai-prompt-textarea" rows="5" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm pr-16"></textarea>
-                               <button id="save-ai-prompt-btn" class="absolute bottom-2 right-2 px-3 py-1 bg-gray-600 text-white font-semibold text-xs rounded-md hover:bg-gray-700 transition-colors">저장</button>
-                            </div>
-                        </div>
-                        <button id="run-ai-review-btn" class="w-full px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">AI 검수 실행</button>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-lg font-bold">오류 취합</h3>
                         <div class="flex items-center space-x-2">
@@ -212,6 +185,7 @@
                                 <svg class="w-5 h-5 text-gray-600"><use href="#icon-expand"></use></svg>
                             </button>
                             <select id="sort-errors-by" class="text-sm rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                                <option value="recent" selected>최신 입력순</option>
                                 <option value="default">기본 정렬</option>
                                 <option value="id-asc">ID 오름차순</option>
                                 <option value="section">섹션별</option>
@@ -221,7 +195,7 @@
                             </button>
                         </div>
                     </div>
-                    <div id="aggregated-errors-list" class="max-h-96 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                    <div id="aggregated-errors-list" class="max-h-[40rem] overflow-y-auto border rounded-md p-2 bg-gray-50">
                         </div>
                 </div>
             </div>
@@ -279,7 +253,6 @@
                 renderPage(currentHanjaData, allHanjaData);
                 addAllEventListeners(currentHanjaData, allHanjaData);
                 initializeReviewPanel(currentHanjaData, allHanjaData);
-                initializeAiReviewPanel(currentHanjaData);
             } else {
                 throw new Error("해당 ID의 한자 정보를 찾을 수 없습니다.");
             }
@@ -289,6 +262,7 @@
         }
     });
 
+    // [수정됨] renderPage 함수에서 해설, 도약 섹션 삭제
     function renderPage(data, allHanjaData) {
         document.title = `[${data.id.replace('-', '권_')}] ${data.serial}_${data.huneum}`;
         document.getElementById('youtube-search-link').href = `https://www.youtube.com/@CrownYuja/search?query=${encodeURIComponent(data.huneum)}`;
@@ -315,89 +289,34 @@
                     </div>
                 </div>
             </section>
-            <section id="meaning" class="content-section mb-24 md:mb-32">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-4xl font-bold mb-8 text-left">✨ 해설</h2>
-                    <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="meaning-explanation-box" class="interactive-box kpi-card p-8 mb-8 bg-amber-50" tabindex="0" data-word="${data.huneum}">
-                            <div class="flex items-start space-x-3">
-                                <input type="checkbox" class="content-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mt-2 flex-shrink-0">
-                                <div>
-                                    <h3 id="explanation-title" class="text-3xl font-bold mb-4 text-[#FF8C00]">${data.huneum} (<strong class="font-bold">${data.hanja}</strong>)</h3>
-                                    <p id="explanation-text" class="text-lg leading-relaxed">${data.explanation.replace(/(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|'[^']+')/g, '<strong class="font-bold text-[#4CAF50]">$1</strong>')}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="meanings-list" class="grid grid-cols-1 gap-6"></div>
-                    </div>
-                </div>
-            </section>
             <section id="vocabulary" class="content-section mb-24 md:mb-32">
                  <div class="max-w-5xl mx-auto">
                     <h2 class="text-4xl font-bold mb-8 text-left">📚 어휘</h2>
                     <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-                    </div>
-                </div>
-            </section>
-            <section id="advanced-vocab" class="content-section mb-16" style="${(!data.advancedVocabulary || data.advancedVocabulary.length === 0) ? 'display: none;' : ''}">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-4xl font-bold mb-8 text-left">🚀 도약</h2>
-                    <div class="bg-white p-8 sm:p-10 rounded-lg shadow-lg">
-                        <div id="advanced-vocabulary-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        <div id="vocabulary-list" class="grid grid-cols-1 gap-6"></div>
                     </div>
                 </div>
             </section>`;
         
         const allErrors = getErrors();
         
-        const setupContentCheckbox = (box, section, title) => {
-            const uniqueId = `${data.id}-${section}-${title}`;
-            box.dataset.uniqueId = uniqueId;
-            box.dataset.hanjaId = data.id;
-            box.dataset.section = section;
-            box.dataset.word = title;
-            box.checked = !!allErrors[uniqueId];
-        };
-        setupContentCheckbox(document.querySelector('#meaning-explanation-box .content-error-checkbox'), '해설', data.huneum);
-        
         const renderItems = (container, dataList, cardCreator) => {
             if (container && dataList?.length > 0) container.innerHTML = dataList.map((item, index) => cardCreator(item, index)).join('');
         };
         
-        const createMeaningCardHTML = (m, index) => {
-            const uniqueId = `${data.id}-의미-${m.title}`;
-            return `<div class="interactive-box kpi-card p-6" data-word="${m.title}" tabindex="0">
-                <div class="flex items-start space-x-3">
-                    <input type="checkbox" class="content-error-checkbox h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 mt-1 flex-shrink-0"
-                           data-unique-id="${uniqueId}" data-hanja-id="${data.id}" data-section="의미" data-word="${m.title}" ${allErrors[uniqueId] ? 'checked' : ''}>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 text-[#4CAF50]">${m.title}</h3>
-                        <p class="text-gray-700">${m.definition.replace(/│/g, '')}</p>
-                        <p class="text-sm italic text-gray-500 mt-2">예: ${m.example}</p>
-                    </div>
-                </div>
-            </div>`;
-        };
-        
-        const createVocabularyCardHTML = (v, index, isAdvanced = false) => {
-            const section = isAdvanced ? '도약' : '어휘';
-            const vocabTitle = isAdvanced ? v.word : v.title;
+        // [수정됨] createVocabularyCardHTML 함수 단순화 (isAdvanced 로직 제거)
+        const createVocabularyCardHTML = (v, index) => {
+            const section = '어휘';
+            const vocabTitle = v.title;
             const uniqueId = `${data.id}-${section}-${vocabTitle}`;
             
-            const titleHTML = isAdvanced ? `<h3 class="text-2xl font-bold">${v.word}</h3>` : `<h3 class="text-2xl font-bold">${v.title.replace(/(\([^)]+\))/g, '<strong class="font-bold text-orange-600">$1</strong>')}</h3>`;
+            const titleHTML = `<h3 class="text-2xl font-bold">${v.title.replace(/(\([^)]+\))/g, '<strong class="font-bold text-orange-600">$1</strong>')}</h3>`;
             const actionsHTML = `<div class="flex items-center">
                 <button class="syllable-analysis-btn p-2 rounded-full hover:bg-gray-100" title="음절 분석"><svg class="w-6 h-6 text-gray-500"><use href="#icon-syllable-analysis"></use></svg></button>
                 <button class="vocab-actions-toggle flex-shrink-0 p-2 -mr-2 rounded-full hover:bg-gray-100"><svg class="w-6 h-6 text-gray-500"><use href="#icon-more-vertical"></use></svg></button>
             </div>`;
-            const linkHTML = isAdvanced ? `<a href="hanja-detail.html?id=${v.linkId}" class="vocab-link inline-flex items-center font-bold text-xs py-0.5 px-2 rounded-full" data-volume="${v.linkId.split('-')[0]}">${v.linkId.replace('-', '권_')} <svg class="w-5 h-5 ml-1"><use href="#icon-arrow-right"></use></svg></a>` : '';
             
-            let detailsHTML;
-            if (isAdvanced) {
-                detailsHTML = `<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">${linkHTML}${actionsHTML}</div>`;
-            } else {
-                detailsHTML = `<div class="vocab-details"><p><strong>뜻:</strong> ${v.definition}</p><p><strong>구성:</strong> ${v.composition}</p>${v.analysis ? `<p><strong>풀이:</strong> ${v.analysis}</p>` : ''}<p class="italic"><strong>예:</strong> ${v.example}</p></div>`;
-            }
+            const detailsHTML = `<div class="vocab-details"><p><strong>뜻:</strong> ${v.definition}</p><p><strong>구성:</strong> ${v.composition}</p>${v.analysis ? `<p><strong>풀이:</strong> ${v.analysis}</p>` : ''}<p class="italic"><strong>예:</strong> ${v.example}</p></div>`;
 
             return `<div class="kpi-card interactive-box relative p-6" data-word="${vocabTitle}">
                 <div class="flex justify-between items-start">
@@ -410,15 +329,13 @@
                                ${allErrors[uniqueId] ? 'checked' : ''}>
                         ${titleHTML}
                     </div>
-                    ${!isAdvanced ? actionsHTML : ''}
+                    ${actionsHTML}
                 </div>
                 ${detailsHTML}
             </div>`;
         };
-
-        renderItems(document.getElementById('meanings-list'), data.meanings, createMeaningCardHTML);
-        renderItems(document.getElementById('vocabulary-list'), data.vocabulary, (v, i) => createVocabularyCardHTML(v, i, false));
-        renderItems(document.getElementById('advanced-vocabulary-list'), data.advancedVocabulary, (v, i) => createVocabularyCardHTML(v, i, true));
+        
+        renderItems(document.getElementById('vocabulary-list'), data.vocabulary, createVocabularyCardHTML);
     }
     
     function addAllEventListeners(hanjaData, allHanjaData) {
@@ -511,7 +428,6 @@
         toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }
     
-    // [수정됨] 관련 없는 JS 코드 삭제
     function initializeIdFinder(allHanjaData) {
         const volumeInput = document.getElementById('search-volume');
         const numInVolumeInput = document.getElementById('search-number-in-volume');
@@ -557,7 +473,8 @@
                 errorLocation: ds.section,
                 feedback: '',
                 suggestion: '',
-                memo: ''
+                memo: '',
+                timestamp: Date.now()
             };
         } else {
             delete errors[uniqueId];
@@ -575,7 +492,9 @@
         const errors = getErrors();
         let errorItems = Object.entries(errors).map(([uniqueId, data]) => ({ uniqueId, ...data }));
         
-        if (sortMethod === 'id-asc') {
+        if (sortMethod === 'recent') {
+            errorItems.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        } else if (sortMethod === 'id-asc') {
             errorItems.sort((a, b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
         } else if (sortMethod === 'section') {
             errorItems.sort((a, b) => a.errorLocation.localeCompare(b.errorLocation) || a.id.localeCompare(b.id, undefined, {numeric: true}));
@@ -700,120 +619,6 @@
         const navigateToHanja = (id) => { window.location.search = `?id=${id}`; };
         prevBtn.onclick = () => { if (currentIndex > 0) navigateToHanja(allHanjaData[currentIndex - 1].id); };
         nextBtn.onclick = () => { if (currentIndex < allHanjaData.length - 1) navigateToHanja(allHanjaData[currentIndex + 1].id); };
-    }
-
-    function initializeAiReviewPanel(currentHanjaData) {
-        const apiKeyInput = document.getElementById('api-key-input');
-        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-        const modelSelect = document.getElementById('gemini-model-select');
-        const promptTextarea = document.getElementById('ai-prompt-textarea');
-        const savePromptBtn = document.getElementById('save-ai-prompt-btn');
-        const runBtn = document.getElementById('run-ai-review-btn');
-
-        if (!apiKeyInput || !saveApiKeyBtn || !runBtn) return;
-        
-        const defaultApiKey = 'AIzaSyB-WkWOgaTtwwTyp_qmCQFl_nWupcHhm6o';
-        const savedApiKey = localStorage.getItem('geminiApiKey') || defaultApiKey;
-        apiKeyInput.value = savedApiKey;
-        runBtn.disabled = !savedApiKey;
-        
-        saveApiKeyBtn.addEventListener('click', () => {
-            const key = apiKeyInput.value.trim();
-            localStorage.setItem('geminiApiKey', key);
-            runBtn.disabled = !key;
-            showToast(key ? 'API 키가 저장되었습니다.' : 'API 키가 삭제되었습니다.');
-        });
-        
-        const defaultPrompt = `당신은 주어진 JSON 데이터를 검토하여 오류를 찾는 한국 한자 전문가입니다. 아래 6가지 유형의 오류를 찾아주세요. 오류가 없다면 빈 JSON 배열 []을 반환하세요.\n\n1.  **매칭 오류**: 'vocabulary'나 'advancedVocabulary'의 'title' 또는 'word'가 그 구성 한자와 의미적으로 맞지 않는 경우입니다. 'definition', 'composition', 'analysis' 필드를 종합적으로 고려하여 판단하세요. 동형어인 경우에 유의하세요.\n2.  **어원 해설의 학술적 타당성**: 'explanation' 내용이 어원적으로나 학술적으로 타당한지 검토하세요.\n3.  **뜻풀이 및 예문의 적절성**: 'meanings'와 'vocabulary' 섹션의 'definition'(뜻)과 'example'(예문)이 자연스럽고 정확한지 검토합니다.\n4.  **학습 어휘의 한자 구성 및 의미의 정확성**: 'composition' 필드가 어휘의 한자 구성과 의미를 정확하게 설명하는지 확인합니다.\n5.  **오탈자, 띄어쓰기, 문법 오류**: 모든 텍스트 필드에서 명백한 오탈자, 띄어쓰기, 문법적 오류를 찾으세요.\n6.  **한자 누락 또는 오기**: 한자가 잘못 표기되거나 누락된 경우를 찾으세요 (예: 十字架를 十字가로 표기).\n\n반드시 아래와 같은 JSON 배열 형식으로만 응답해야 합니다. 각 오류 항목은 JSON 객체로 표현해주세요.\n\n[\n  {\n    "identifier": "오류가 발견된 카드의 제목 (원본 데이터의 'huneum', 'title', 'word' 값을 그대로 사용)",\n    "errorItem": "실제 오류가 발생한 텍스트",\n    "errorLocation": "해설/의미/어휘/도약 중 하나",\n    "feedback": "오류에 대한 구체적인 설명",\n    "suggestion": "AI가 제안하는 수정안"\n  }\n]`;
-        promptTextarea.value = localStorage.getItem('geminiUserPrompt') || defaultPrompt;
-        
-        savePromptBtn.addEventListener('click', () => {
-            localStorage.setItem('geminiUserPrompt', promptTextarea.value);
-            showToast('AI 명령어가 저장되었습니다.');
-        });
-
-        runBtn.addEventListener('click', async () => {
-            const apiKey = localStorage.getItem('geminiApiKey');
-            if (!apiKey) {
-                showToast('API 키를 입력하고 저장해주세요.', 'error');
-                return;
-            }
-            
-            showToast('AI 검수를 시작합니다...');
-            runBtn.disabled = true;
-            runBtn.textContent = '검수 중...';
-
-            document.querySelectorAll('.ai-feedback').forEach(el => el.remove());
-            document.querySelectorAll('.ai-highlight').forEach(el => el.classList.remove('ai-highlight'));
-
-            try {
-                const model = modelSelect.value;
-                const userPrompt = promptTextarea.value;
-                const pageData = JSON.stringify(currentHanjaData, null, 2);
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ parts: [{ text: `${userPrompt}\n\n---\n\n${pageData}` }] }] };
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || 'API 요청 실패');
-                }
-
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                
-                if (!text) throw new Error('AI로부터 유효한 응답을 받지 못했습니다.');
-
-                const jsonStringMatch = text.match(/\[[\s\S]*\]/);
-                if (!jsonStringMatch) throw new Error('응답에서 JSON 배열을 찾을 수 없습니다.');
-                
-                const suggestions = JSON.parse(jsonStringMatch[0]);
-
-                if (suggestions.length === 0) {
-                    showToast('AI 검수 결과, 오류를 찾지 못했습니다.');
-                } else {
-                    suggestions.forEach(item => {
-                        if (!item.identifier) {
-                            console.warn('AI 응답에 identifier가 없습니다:', item);
-                            return;
-                        }
-
-                        const feedbackHTML = `
-                            <div class="ai-feedback mt-4 pt-4 border-t-2 border-dashed border-red-300">
-                                <h4 class="font-bold text-red-600">🤖 AI 검수 결과</h4>
-                                <p class="text-sm text-gray-800 mt-1"><strong>오류 내용:</strong> ${item.errorItem || 'N/A'}</p>
-                                ${item.feedback ? `<p class="text-sm text-gray-700 mt-1"><strong>피드백:</strong> ${item.feedback}</p>` : ''}
-                                ${item.suggestion ? `<p class="text-sm text-green-700 mt-1"><strong>수정 제안:</strong> ${item.suggestion}</p>` : ''}
-                            </div>`;
-                        
-                        const identifier = item.identifier.trim();
-                        const targetElement = Array.from(document.querySelectorAll('.kpi-card')).find(card => card.dataset.word && card.dataset.word.trim() === identifier);
-
-                        if (targetElement) {
-                            const contentWrapper = targetElement.querySelector('div > div');
-                             if (contentWrapper) {
-                                contentWrapper.insertAdjacentHTML('beforeend', feedbackHTML);
-                            } else {
-                                targetElement.insertAdjacentHTML('beforeend', feedbackHTML);
-                            }
-                            targetElement.classList.add('ai-highlight');
-                        } else {
-                             console.warn(`AI feedback for identifier "${identifier}" in section "${item.errorLocation}" could not be placed.`);
-                        }
-                    });
-                    showToast(`${suggestions.length}개의 AI 제안을 표시했습니다.`);
-                }
-            } catch (error) {
-                console.error('AI Review Error:', error);
-                showToast(`오류 발생: ${error.message}`, 'error');
-            } finally {
-                runBtn.disabled = false;
-                runBtn.textContent = 'AI 검수 실행';
-            }
-        });
     }
     </script>
 </body>

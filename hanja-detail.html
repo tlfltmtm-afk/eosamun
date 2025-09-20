@@ -256,18 +256,18 @@
             </div>
 
             <section id="page-navigation" class="content-section mb-24">
-                <div class="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <a id="prev-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-6 flex items-center justify-start text-left transition-all duration-300 ease-in-out group" tabindex="0">
+                <div class="max-w-5xl mx-auto grid grid-cols-2 gap-4 sm:gap-6">
+                    <a id="prev-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-4 sm:p-6 flex items-center text-left transition-all duration-300 ease-in-out group" tabindex="0">
                         <svg class="w-7 h-7 mr-4 text-gray-400 group-hover:text-orange-500 transform group-hover:-translate-x-1 transition-transform flex-shrink-0"><use href="#icon-arrow-left"></use></svg>
                         <div>
-                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">이전 한자</p>
-                            <p id="prev-hanja-title" class="text-xl font-bold text-gray-800"></p>
+                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">이전</p>
+                            <p id="prev-hanja-title" class="font-bold text-gray-800 text-base sm:text-lg"></p>
                         </div>
                     </a>
-                    <a id="next-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-6 flex items-center justify-end text-right transition-all duration-300 ease-in-out group" tabindex="0">
+                    <a id="next-hanja-link" href="#" class="nav-link kpi-card bg-orange-50 hover:bg-orange-100 p-4 sm:p-6 flex items-center justify-end text-right transition-all duration-300 ease-in-out group" tabindex="0">
                         <div>
-                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">다음 한자</p>
-                            <p id="next-hanja-title" class="text-xl font-bold text-gray-800"></p>
+                            <p class="text-sm text-gray-500 group-hover:text-orange-500 transition-colors">다음</p>
+                            <p id="next-hanja-title" class="font-bold text-gray-800 text-base sm:text-lg"></p>
                         </div>
                         <svg class="w-7 h-7 ml-4 text-gray-400 group-hover:text-orange-500 transform group-hover:translate-x-1 transition-transform flex-shrink-0"><use href="#icon-arrow-right"></use></svg>
                     </a>
@@ -278,17 +278,17 @@
         <footer id="footer-promo-container" class="my-10 flex justify-center items-center px-4">
             <div id="purchase-box" tabindex="0" class="interactive-box kpi-card w-full max-w-lg bg-yellow-300/80 backdrop-blur-sm rounded-2xl border-4 border-transparent p-6 md:p-8">
                 <div class="text-center text-gray-800 font-semibold">
-                        <p class="text-base md:text-lg">👑 왕관유자샘의 어휘력 향상 프로젝트 🍊</p>
-                        <p class="mt-2 text-base md:text-lg">💡 어•사•문 교재와 함께 공부해요. 💡</p>
+                        <p class="text-base md:text-lg">👑왕관유자샘의 어휘력 시리즈🍊</p>
+                        <p class="mt-2 text-base md:text-lg">💡어•사•문 교재와 함께 공부해요.💡</p>
                 </div>
                 <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <a href="#" id="buy-book-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                         <svg class="w-6 h-6 mr-3 text-amber-600"><use href="#icon-book"></use></svg>
-                        <span class="font-semibold text-gray-700">교재 구입하기</span>
+                        <span class="font-semibold text-gray-700">교재 구입</span>
                     </a>
                     <a href="#" id="download-app-link" class="footer-link flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
                         <svg class="w-6 h-6 mr-3 text-sky-600"><use href="#icon-download"></use></svg>
-                        <span class="font-semibold text-gray-700">앱 다운로드</span>
+                        <span class="font-semibold text-gray-700">앱 설치</span>
                     </a>
                 </div>
             </div>
@@ -462,6 +462,8 @@
         } else {
             prevLink.href = '#';
             prevTitle.textContent = '첫 번째 한자입니다';
+            // 비활성화 시 안내문구는 보이도록 처리
+            prevLink.querySelector('p:first-child').style.display = 'none';
             prevLink.classList.add('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
             prevLink.addEventListener('click', e => e.preventDefault());
         }
@@ -476,6 +478,8 @@
         } else {
             nextLink.href = '#';
             nextTitle.textContent = '마지막 한자입니다';
+            // 비활성화 시 안내문구는 보이도록 처리
+            nextLink.querySelector('p:first-child').style.display = 'none';
             nextLink.classList.add('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
             nextLink.addEventListener('click', e => e.preventDefault());
         }
